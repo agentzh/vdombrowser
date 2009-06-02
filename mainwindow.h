@@ -122,6 +122,7 @@ private:
     void setupUI();
 
     void createCentralWidget();
+    void createWebView();
     void createSideBar();
     void createToolBar();
     void createMenus();

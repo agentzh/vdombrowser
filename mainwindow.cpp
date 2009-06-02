@@ -62,31 +62,18 @@ void MainWindow::setupUI() {
 }
 
 void MainWindow::createCentralWidget() {
+    createSideBar();
+    createWebView();
+
     QSplitter* splitter = new QSplitter(this);
-    view = new QWebView(splitter);
-    splitter->addWidget(view);
-
-    sidebar = new QWidget;
-    QVBoxLayout *sidebarLayout = new QVBoxLayout;
-    sidebar->setLayout(sidebarLayout);
-
-    QLabel* label = new QLabel(tr("Active item description"), sidebar);
-    sidebarLayout->addWidget(label);
-    itemInfoEdit = new QTextEdit(sidebar);
-    itemInfoEdit->setReadOnly(true);
-    sidebarLayout->addWidget(itemInfoEdit);
-
-    label = new QLabel(tr("Page item summary"), sidebar);
-    sidebarLayout->addWidget(label);
-    pageInfoEdit = new QTextEdit(sidebar);
-    pageInfoEdit->setReadOnly(true);
-    sidebarLayout->addWidget(pageInfoEdit);
-
     splitter->addWidget(view);
     splitter->addWidget(sidebar);
 
     setCentralWidget(splitter);
+}
 
+void MainWindow::createWebView() {
+    view = new QWebView(this);
     view->setPage(new WebPage(view));
 
     connect(view, SIGNAL(loadFinished(bool)),
@@ -101,6 +88,21 @@ void MainWindow::createCentralWidget() {
 }
 
 void MainWindow::createSideBar() {
+    sidebar = new QWidget(this);
+    QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebar);
+    sidebar->setLayout(sidebarLayout);
+
+    QLabel* label = new QLabel(tr("Active item description"), sidebar);
+    sidebarLayout->addWidget(label);
+    itemInfoEdit = new QTextEdit(sidebar);
+    itemInfoEdit->setReadOnly(true);
+    sidebarLayout->addWidget(itemInfoEdit);
+
+    label = new QLabel(tr("Page item summary"), sidebar);
+    sidebarLayout->addWidget(label);
+    pageInfoEdit = new QTextEdit(sidebar);
+    pageInfoEdit->setReadOnly(true);
+    sidebarLayout->addWidget(pageInfoEdit);
 }
 
 void MainWindow::createUrlEdit() {
