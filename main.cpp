@@ -8,79 +8,14 @@
 #include <QPrintPreviewDialog>
 #endif
 
-
 #include <QVector>
 #include <QTextStream>
 #include <QFile>
 #include <cstdio>
+
 #include "webpage.h"
 #include "mainwindow.h"
-
-class URLLoader : public QObject
-{
-    Q_OBJECT
-public:
-    URLLoader(QWebView* view, const QString& inputFileName)
-        : m_view(view)
-        , m_stdOut(stdout)
-    {
-        init(inputFileName);
-    }
-
-public slots:
-    void loadNext()
-    {
-        QString qstr;
-        if (getUrl(qstr)) {
-            QUrl url;
-            url.setEncodedUrl(qstr.toUtf8(), QUrl::StrictMode);
-            if (url.isValid()) {
-                m_stdOut << "Loading " << qstr << " ......" << endl;
-                m_view->load(url);
-            } else
-                loadNext();
-        } else
-            disconnect(m_view, 0, this, 0);
-    }
-
-private:
-    void init(const QString& inputFileName)
-    {
-        QFile inputFile(inputFileName);
-        if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QTextStream stream(&inputFile);
-            QString line;
-            while (true) {
-                line = stream.readLine();
-                if (line.isNull())
-                    break;
-                m_urls.append(line);
-            }
-        } else {
-            qDebug() << "Cant't open list file";
-            exit(0);
-        }
-        m_index = 0;
-        inputFile.close();
-    }
-
-    bool getUrl(QString& qstr)
-    {
-        if (m_index == m_urls.size())
-            return false;
-
-        qstr = m_urls[m_index++];
-        return true;
-    }
-
-private:
-    QVector<QString> m_urls;
-    int m_index;
-    QWebView* m_view;
-    QTextStream m_stdOut;
-};
-
-#include "main.moc"
+#include "urlloader.h"
 
 int main(int argc, char **argv)
 {
@@ -126,3 +61,4 @@ int main(int argc, char **argv)
         return app.exec();
     }
 }
+

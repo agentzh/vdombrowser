@@ -1,6 +1,6 @@
 TEMPLATE = app
-SOURCES += mainwindow.cpp webpage.cpp main.cpp
-HEADERS += mainwindow.h webpage.h
+SOURCES += urlloader.cpp mainwindow.cpp webpage.cpp main.cpp
+HEADERS += urlloader.h mainwindow.h webpage.h
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
 DESTDIR = .
