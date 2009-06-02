@@ -209,21 +209,21 @@ void MainWindow::createEditMenu() {
 }
 
 void MainWindow::createViewMenu() {
-    QMenu *viewMenu = menuBar()->addMenu("&View");
+    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
     viewMenu->addAction(view->pageAction(QWebPage::Stop));
     viewMenu->addAction(view->pageAction(QWebPage::Reload));
     viewMenu->addSeparator();
 
-    QAction *zoomIn = viewMenu->addAction("Zoom &In", this, SLOT(zoomIn()));
+    QAction *zoomIn = viewMenu->addAction(tr("Zoom &In"), this, SLOT(zoomIn()));
     zoomIn->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Plus));
 
-    QAction *zoomOut = viewMenu->addAction("Zoom &Out", this, SLOT(zoomOut()));
+    QAction *zoomOut = viewMenu->addAction(tr("Zoom &Out"), this, SLOT(zoomOut()));
     zoomOut->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus));
 
-    QAction *resetZoom = viewMenu->addAction("Reset Zoom", this, SLOT(resetZoom()));
+    QAction *resetZoom = viewMenu->addAction(tr("Reset Zoom"), this, SLOT(resetZoom()));
     resetZoom->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_0));
 
-    QAction *zoomTextOnly = viewMenu->addAction("Zoom Text Only", this, SLOT(toggleZoomTextOnly(bool)));
+    QAction *zoomTextOnly = viewMenu->addAction(tr("Zoom Text Only"), this, SLOT(toggleZoomTextOnly(bool)));
     zoomTextOnly->setCheckable(true);
     zoomTextOnly->setChecked(false);
 
@@ -232,10 +232,28 @@ void MainWindow::createViewMenu() {
 }
 
 void MainWindow::createSettingsMenu() {
-    QMenu *settingsMenu = menuBar()->addMenu("&Settings");
-    QAction *enableJS = settingsMenu->addAction("Enable Javascript", this, SLOT(toggleEnableJavascript(bool)));
-    enableJS->setCheckable(true);
-    enableJS->setChecked(m_enableJavascript);
+    QMenu *settingsMenu = menuBar()->addMenu(tr("&Settings"));
+
+    {
+        QAction *enableJS = settingsMenu->addAction(tr("Enable &Javascript"), this, SLOT(toggleEnableJavascript(bool)));
+        enableJS->setCheckable(true);
+        enableJS->setChecked(m_enableJavascript);
+    }
+    {
+        QAction *enableImages = settingsMenu->addAction(tr("Enable &Images"), this, SLOT(toggleEnableImages(bool)));
+        enableImages->setCheckable(true);
+        enableImages->setChecked(m_enableImages);
+    }
+    {
+        QAction *enablePlugins = settingsMenu->addAction(tr("Enable &Plugins"), this, SLOT(toggleEnablePlugins(bool)));
+        enablePlugins->setCheckable(true);
+        enablePlugins->setChecked(m_enablePlugins);
+    }
+    {
+        QAction *enableJava = settingsMenu->addAction(tr("Enable J&ava"), this, SLOT(toggleEnableJava(bool)));
+        enableJava->setCheckable(true);
+        enableJava->setChecked(m_enableJava);
+    }
 }
 
 void MainWindow::createHelpMenu() {

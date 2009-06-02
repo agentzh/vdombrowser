@@ -119,6 +119,21 @@ protected slots:
         view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, enabled);
     }
 
+    void toggleEnableJava(bool enabled) {
+        m_enableJava = enabled;
+        view->page()->settings()->setAttribute(QWebSettings::JavaEnabled, enabled);
+    }
+
+    void toggleEnableImages(bool enabled) {
+        m_enableImages = enabled;
+        view->page()->settings()->setAttribute(QWebSettings::AutoLoadImages, enabled);
+    }
+
+    void toggleEnablePlugins(bool enabled) {
+        m_enablePlugins = enabled;
+        view->page()->settings()->setAttribute(QWebSettings::PluginsEnabled, enabled);
+    }
+
 private:
 
     QVector<int> zoomLevels;
