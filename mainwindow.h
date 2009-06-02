@@ -135,6 +135,12 @@ protected slots:
         view->page()->settings()->setAttribute(QWebSettings::PluginsEnabled, enabled);
     }
 
+    void saveHunterConfig() {
+        m_hunterEnabled = hunterConfig->hunterEnabled();
+        m_hunterPath = hunterConfig->progPath();
+        m_vdomPath   = hunterConfig->vdomPath();
+    }
+
 private:
 
     QVector<int> zoomLevels;
@@ -178,6 +184,10 @@ private:
     bool m_enablePlugins;
     bool m_enableImages;
     bool m_enableJava;
+
+    bool m_hunterEnabled;
+    QString m_hunterPath;
+    QString m_vdomPath;
 };
 
 #endif

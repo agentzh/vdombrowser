@@ -2,7 +2,13 @@
 
 HunterConfigDialog::HunterConfigDialog(QWidget *parent): QDialog(parent) {
     QVBoxLayout* layout = new QVBoxLayout(this);
-    QGridLayout* formLayout = new QGridLayout;
+    formGroup = new QGroupBox(tr("&Enable X Hunter"), this);
+    formGroup->setCheckable(true);
+    formGroup->setChecked(false);
+
+    QGridLayout* formLayout = new QGridLayout(formGroup);
+    formGroup->setLayout(formLayout);
+    //formGroup->setFlat(false);
 
     QLabel *label = new QLabel(tr("&Hunter program path"), this);
     formLayout->addWidget(label, 0, 0);
@@ -20,15 +26,19 @@ HunterConfigDialog::HunterConfigDialog(QWidget *parent): QDialog(parent) {
 
     formLayout->setSpacing(20);
 
-    layout->addLayout(formLayout);
+    layout->addWidget(formGroup);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout;
     buttonsLayout->addSpacing(300);
 
     QPushButton* button = new QPushButton(tr("&Save"), this);
+    connect(button, SIGNAL(clicked()),
+            this, SLOT(accept()));
     buttonsLayout->addWidget(button);
 
     button = new QPushButton(tr("&Cancel"), this);
+    connect(button, SIGNAL(clicked()),
+            this, SLOT(reject()));
     buttonsLayout->addWidget(button);
     buttonsLayout->addStretch();
 
@@ -37,5 +47,6 @@ HunterConfigDialog::HunterConfigDialog(QWidget *parent): QDialog(parent) {
 
     setLayout(layout);
     setFixedSize(QSize(550, 200));
+    setWindowTitle(tr("X Hunter Configuration"));
 }
 

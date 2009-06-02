@@ -5,7 +5,7 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
     hunterConfig = new HunterConfigDialog(this);
     connect(hunterConfig, SIGNAL(accepted()),
-            this, SLOT(loadFinished()));
+            this, SLOT(saveHunterConfig()));
 
     settings = new QSettings(
         QSettings::UserScope,
@@ -272,23 +272,42 @@ void MainWindow::createHelpMenu() {
 
 void MainWindow::writeSettings() {
     settings->beginGroup("MainWindow");
+
     settings->setValue("size", size());
     settings->setValue("pos", pos());
+
     settings->setValue("enableJavascript", QVariant(m_enableJavascript));
     settings->setValue("enablePlugins", QVariant(m_enablePlugins));
     settings->setValue("enableImages", QVariant(m_enableImages));
     settings->setValue("enableJava", QVariant(m_enableJava));
+
+    settings->setValue("hunterEnabled", QVariant(m_hunterEnabled));
+    settings->setValue("hunterPath", m_hunterPath);
+    settings->setValue("vdomPath", m_vdomPath);
+
     settings->endGroup();
 }
 
 void MainWindow::readSettings() {
     settings->beginGroup("MainWindow");
+
     resize(settings->value("size", QSize(800, 600)).toSize());
     move(settings->value("pos", QPoint(200, 200)).toPoint());
+
     m_enableJavascript = settings->value("enableJavascript").toBool();
     m_enablePlugins = settings->value("enablePlugins").toBool();
     m_enableImages = settings->value("enableImages").toBool();
     m_enableJava = settings->value("enableJava").toBool();
+
+    m_hunterEnabled = settings->value("hunterEnabled").toBool();
+    hunterConfig->setHunterEnabled(m_hunterEnabled);
+
+    m_hunterPath = settings->value("hunterPath").toString();
+    hunterConfig->setProgPath(m_hunterPath);
+
+    m_vdomPath   = settings->value("vdomPath").toString();
+    hunterConfig->setVdomPath(m_vdomPath);
+
     settings->endGroup();
 }
 
