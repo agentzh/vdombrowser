@@ -9,6 +9,7 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
         qApp->applicationName(),
         this
     );
+    readSettings();
 
     setupUI();
 
@@ -23,7 +24,6 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
         zoomLevels << 100;
         zoomLevels << 110 << 120 << 133 << 150 << 170 << 200 << 240 << 300;
     }
-    readSettings();
 }
 
 void MainWindow::changeLocation() {
@@ -83,7 +83,13 @@ void MainWindow::createCentralWidget() {
 
 void MainWindow::createWebView() {
     view = new QWebView(this);
-    view->setPage(new WebPage(view));
+    QWebPage* page = new QWebPage(view);
+    page->settings()->setAttribute(QWebSettings::JavascriptEnabled, m_enableJavascript);
+    page->settings()->setAttribute(QWebSettings::PluginsEnabled, m_enablePlugins);
+    page->settings()->setAttribute(QWebSettings::AutoLoadImages, m_enableImages);
+    page->settings()->setAttribute(QWebSettings::JavaEnabled, m_enableJava);
+
+    view->setPage(page);
 
     connect(view, SIGNAL(loadFinished(bool)),
             this, SLOT(loadFinished()));
@@ -165,6 +171,7 @@ void MainWindow::createMenus() {
     createFileMenu();
     createEditMenu();
     createViewMenu();
+    createSettingsMenu();
     createHelpMenu();
 }
 
@@ -224,6 +231,13 @@ void MainWindow::createViewMenu() {
     //viewMenu->addAction("Dump HTML", this, SLOT(dumpHtml()));
 }
 
+void MainWindow::createSettingsMenu() {
+    QMenu *settingsMenu = menuBar()->addMenu("&Settings");
+    QAction *enableJS = settingsMenu->addAction("Enable Javascript", this, SLOT(toggleEnableJavascript(bool)));
+    enableJS->setCheckable(true);
+    enableJS->setChecked(m_enableJavascript);
+}
+
 void MainWindow::createHelpMenu() {
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
@@ -235,6 +249,10 @@ void MainWindow::writeSettings() {
     settings->beginGroup("MainWindow");
     settings->setValue("size", size());
     settings->setValue("pos", pos());
+    settings->setValue("enableJavascript", QVariant(m_enableJavascript));
+    settings->setValue("enablePlugins", QVariant(m_enablePlugins));
+    settings->setValue("enableImages", QVariant(m_enableImages));
+    settings->setValue("enableJava", QVariant(m_enableJava));
     settings->endGroup();
 }
 
@@ -242,6 +260,10 @@ void MainWindow::readSettings() {
     settings->beginGroup("MainWindow");
     resize(settings->value("size", QSize(800, 600)).toSize());
     move(settings->value("pos", QPoint(200, 200)).toPoint());
+    m_enableJavascript = settings->value("enableJavascript").toBool();
+    m_enablePlugins = settings->value("enablePlugins").toBool();
+    m_enableImages = settings->value("enableImages").toBool();
+    m_enableJava = settings->value("enableJava").toBool();
     settings->endGroup();
 }
 

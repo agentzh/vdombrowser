@@ -109,20 +109,14 @@ protected slots:
 #endif
     }
 
-    void setEditable(bool on) {
-        view->page()->setContentEditable(on);
-        formatMenuAction->setVisible(on);
-    }
-
-/*
-    void dumpHtml() {
-        qDebug() << "HTML: " << view->page()->mainFrame()->toHtml();
-    }
-*/
-
     void aboutMe() {
         AboutDialog* about = new AboutDialog(this);
         about->show();
+    }
+
+    void toggleEnableJavascript(bool enabled) {
+        m_enableJavascript = enabled;
+        view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, enabled);
     }
 
 private:
@@ -142,6 +136,7 @@ private:
     void createFileMenu();
     void createEditMenu();
     void createViewMenu();
+    void createSettingsMenu();
     void createHelpMenu();
 
     void createProgressBar();
@@ -158,11 +153,14 @@ private:
     QWidget *sidebar;
     QProgressBar *progress;
 
-    QAction *formatMenuAction;
-
     QStringList urlList;
     QStringListModel urlModel;
     QSettings* settings;
+
+    bool m_enableJavascript;
+    bool m_enablePlugins;
+    bool m_enableImages;
+    bool m_enableJava;
 };
 
 #endif

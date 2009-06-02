@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     QString url = QString("%1/%2").arg(QDir::homePath()).arg(QLatin1String("index.html"));
 
-    QWebSettings::setMaximumPagesInCache(4);
+    QWebSettings::setMaximumPagesInCache(20);
 
     app.setApplicationName(VB_PRODUCT_NAME);
     app.setApplicationVersion(
@@ -36,11 +36,7 @@ int main(int argc, char **argv)
 
     QWebSettings::setObjectCacheCapacities((16*1024*1024) / 8, (16*1024*1024) / 8, 16*1024*1024);
 
-    QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, false);
     QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
-    QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, true);
-    QWebSettings::globalSettings()->setAttribute(QWebSettings::JavaEnabled, false);
-    QWebSettings::globalSettings()->setAttribute(QWebSettings::JavascriptEnabled, true);
 
     const QStringList args = app.arguments();
 
