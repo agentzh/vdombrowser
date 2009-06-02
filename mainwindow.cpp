@@ -3,6 +3,12 @@
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
+    settings = new QSettings(
+        QSettings::UserScope,
+        qApp->organizationDomain(),
+        qApp->applicationName(),
+        this
+    );
 
     setupUI();
 
@@ -17,6 +23,7 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
         zoomLevels << 100;
         zoomLevels << 110 << 120 << 133 << 150 << 170 << 200 << 240 << 300;
     }
+    readSettings();
 }
 
 void MainWindow::changeLocation() {
@@ -222,5 +229,24 @@ void MainWindow::createHelpMenu() {
     helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
     helpMenu->addAction(tr("&About ") + qApp->applicationName(),
             this, SLOT(aboutMe()));
+}
+
+void MainWindow::writeSettings() {
+    settings->beginGroup("MainWindow");
+    settings->setValue("size", size());
+    settings->setValue("pos", pos());
+    settings->endGroup();
+}
+
+void MainWindow::readSettings() {
+    settings->beginGroup("MainWindow");
+    resize(settings->value("size", QSize(800, 600)).toSize());
+    move(settings->value("pos", QPoint(200, 200)).toPoint());
+    settings->endGroup();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    writeSettings();
+    event->accept();
 }
 

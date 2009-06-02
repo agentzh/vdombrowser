@@ -30,6 +30,9 @@ int main(int argc, char **argv)
             .arg(VB_MINORVERSION_NUMBER)
             .arg(VB_PATCHLEVEL_NUMBER)
     );
+    QCoreApplication::setOrganizationName("Yahoo China EEEE");
+    QCoreApplication::setOrganizationDomain("eeeeworks.org");
+    QCoreApplication::setApplicationName(VB_PRODUCT_NAME);
 
     QWebSettings::setObjectCacheCapacities((16*1024*1024) / 8, (16*1024*1024) / 8, 16*1024*1024);
 

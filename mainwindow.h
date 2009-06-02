@@ -23,6 +23,10 @@ public:
         return view;
     }
 
+protected:
+
+    virtual void closeEvent(QCloseEvent * event);
+
 protected slots:
 
     void loadUrl(const QUrl& url) {
@@ -143,6 +147,9 @@ private:
     void createProgressBar();
     void createUrlEdit();
 
+    void writeSettings();
+    void readSettings();
+
     QTextEdit* itemInfoEdit;
     QTextEdit* pageInfoEdit;
 
@@ -155,9 +162,8 @@ private:
 
     QStringList urlList;
     QStringListModel urlModel;
+    QSettings* settings;
 };
-
-
 
 #endif
 
