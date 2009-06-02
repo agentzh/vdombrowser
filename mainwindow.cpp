@@ -219,7 +219,8 @@ void MainWindow::createViewMenu() {
 
 void MainWindow::createHelpMenu() {
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    QAction *about = helpMenu->addAction(tr("A&bout ") + qApp->applicationName(), this, SLOT(aboutMe()));
-    Q_UNUSED(about);
+    helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
+    helpMenu->addAction(tr("&About ") + qApp->applicationName(),
+            this, SLOT(aboutMe()));
 }
 
