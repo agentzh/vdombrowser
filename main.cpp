@@ -1,21 +1,20 @@
+#include "version.h"
+#include "webpage.h"
+#include "mainwindow.h"
+#include "urlloader.h"
+
 #include <qwebview.h>
 #include <qwebframe.h>
 #include <qwebsettings.h>
 
 #include <QtGui>
 #include <QDebug>
-#if QT_VERSION >= 0x040400 && !defined(QT_NO_PRINTER)
 #include <QPrintPreviewDialog>
-#endif
 
 #include <QVector>
 #include <QTextStream>
 #include <QFile>
 #include <cstdio>
-
-#include "webpage.h"
-#include "mainwindow.h"
-#include "urlloader.h"
 
 int main(int argc, char **argv)
 {
@@ -24,10 +23,13 @@ int main(int argc, char **argv)
 
     QWebSettings::setMaximumPagesInCache(4);
 
-    app.setApplicationName("QtLauncher");
-#if QT_VERSION >= 0x040400
-    app.setApplicationVersion("0.1");
-#endif
+    app.setApplicationName(VB_PRODUCT_NAME);
+    app.setApplicationVersion(
+        QString("%1.%2.%3")
+            .arg(VB_MAJORVERSION_NUMBER)
+            .arg(VB_MINORVERSION_NUMBER)
+            .arg(VB_PATCHLEVEL_NUMBER)
+    );
 
     QWebSettings::setObjectCacheCapacities((16*1024*1024) / 8, (16*1024*1024) / 8, 16*1024*1024);
 

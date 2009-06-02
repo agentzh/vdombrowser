@@ -1,6 +1,16 @@
 TEMPLATE = app
-SOURCES += lineedit.cpp urlloader.cpp mainwindow.cpp webpage.cpp main.cpp
-HEADERS += lineedit.h urlloader.h mainwindow.h webpage.h
+SOURCES += aboutdialog.cpp \
+           lineedit.cpp \
+           urlloader.cpp \
+           mainwindow.cpp \
+           webpage.cpp \
+           main.cpp
+HEADERS += aboutdialog.h \
+           version.h \
+           lineedit.h \
+           urlloader.h \
+           mainwindow.h \
+           webpage.h
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
 DESTDIR = .

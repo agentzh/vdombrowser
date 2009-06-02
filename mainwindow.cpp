@@ -2,6 +2,8 @@
 #include "webpage.h"
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
+    QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
+
     setupUI();
 
     QUrl qurl;
@@ -85,6 +87,19 @@ void MainWindow::createWebView() {
     connect(view->page(), SIGNAL(windowCloseRequested()), this, SLOT(deleteLater()));
     connect(view, SIGNAL(urlChanged(const QUrl&)), this, SLOT(updateUrl(const QUrl&)));
     connect(view, SIGNAL(linkClicked(const QUrl&)), this, SLOT(loadUrl(const QUrl&)));
+
+    view->pageAction(QWebPage::Back)->setShortcut(QKeySequence::Back);
+    view->pageAction(QWebPage::Stop)->setShortcut(Qt::Key_Escape);
+    view->pageAction(QWebPage::Forward)->setShortcut(QKeySequence::Forward);
+    view->pageAction(QWebPage::Reload)->setShortcut(QKeySequence::Refresh);
+    view->pageAction(QWebPage::Undo)->setShortcut(QKeySequence::Undo);
+    view->pageAction(QWebPage::Redo)->setShortcut(QKeySequence::Redo);
+    view->pageAction(QWebPage::Cut)->setShortcut(QKeySequence::Cut);
+    view->pageAction(QWebPage::Copy)->setShortcut(QKeySequence::Copy);
+    view->pageAction(QWebPage::Paste)->setShortcut(QKeySequence::Paste);
+    view->pageAction(QWebPage::ToggleBold)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
+    view->pageAction(QWebPage::ToggleItalic)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
+    view->pageAction(QWebPage::ToggleUnderline)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
 }
 
 void MainWindow::createSideBar() {
@@ -140,66 +155,18 @@ void MainWindow::createToolBar() {
 }
 
 void MainWindow::createMenus() {
+    createFileMenu();
+    createEditMenu();
+    createViewMenu();
+    createHelpMenu();
+}
+
+void MainWindow::createFileMenu() {
     QMenu *fileMenu = menuBar()->addMenu("&File");
-    QAction *newWindow = fileMenu->addAction("New Window", this, SLOT(newWindow()));
-#if QT_VERSION >= 0x040400
-    fileMenu->addAction(tr("Print"), this, SLOT(print()));
-#endif
-    fileMenu->addAction("Close", this, SLOT(close()));
-
-    QMenu *editMenu = menuBar()->addMenu("&Edit");
-    editMenu->addAction(view->pageAction(QWebPage::Undo));
-    editMenu->addAction(view->pageAction(QWebPage::Redo));
-    editMenu->addSeparator();
-    editMenu->addAction(view->pageAction(QWebPage::Cut));
-    editMenu->addAction(view->pageAction(QWebPage::Copy));
-    editMenu->addAction(view->pageAction(QWebPage::Paste));
-    editMenu->addSeparator();
-    QAction *setEditable = editMenu->addAction("Set Editable", this, SLOT(setEditable(bool)));
-    setEditable->setCheckable(true);
-
-    QMenu *viewMenu = menuBar()->addMenu("&View");
-    viewMenu->addAction(view->pageAction(QWebPage::Stop));
-    viewMenu->addAction(view->pageAction(QWebPage::Reload));
-    viewMenu->addSeparator();
-    QAction *zoomIn = viewMenu->addAction("Zoom &In", this, SLOT(zoomIn()));
-    QAction *zoomOut = viewMenu->addAction("Zoom &Out", this, SLOT(zoomOut()));
-    QAction *resetZoom = viewMenu->addAction("Reset Zoom", this, SLOT(resetZoom()));
-    QAction *zoomTextOnly = viewMenu->addAction("Zoom Text Only", this, SLOT(toggleZoomTextOnly(bool)));
-    zoomTextOnly->setCheckable(true);
-    zoomTextOnly->setChecked(false);
-    viewMenu->addSeparator();
-    viewMenu->addAction("Dump HTML", this, SLOT(dumpHtml()));
-
-    QMenu *formatMenu = new QMenu("F&ormat");
-    formatMenuAction = menuBar()->addMenu(formatMenu);
-    formatMenuAction->setVisible(false);
-    formatMenu->addAction(view->pageAction(QWebPage::ToggleBold));
-    formatMenu->addAction(view->pageAction(QWebPage::ToggleItalic));
-    formatMenu->addAction(view->pageAction(QWebPage::ToggleUnderline));
-    QMenu *writingMenu = formatMenu->addMenu(tr("Writing Direction"));
-    writingMenu->addAction(view->pageAction(QWebPage::SetTextDirectionDefault));
-    writingMenu->addAction(view->pageAction(QWebPage::SetTextDirectionLeftToRight));
-    writingMenu->addAction(view->pageAction(QWebPage::SetTextDirectionRightToLeft));
-
+    QAction *newWindow = fileMenu->addAction(tr("New Window"), this, SLOT(newWindow()));
     newWindow->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_N));
-    view->pageAction(QWebPage::Back)->setShortcut(QKeySequence::Back);
-    view->pageAction(QWebPage::Stop)->setShortcut(Qt::Key_Escape);
-    view->pageAction(QWebPage::Forward)->setShortcut(QKeySequence::Forward);
-    view->pageAction(QWebPage::Reload)->setShortcut(QKeySequence::Refresh);
-    view->pageAction(QWebPage::Undo)->setShortcut(QKeySequence::Undo);
-    view->pageAction(QWebPage::Redo)->setShortcut(QKeySequence::Redo);
-    view->pageAction(QWebPage::Cut)->setShortcut(QKeySequence::Cut);
-    view->pageAction(QWebPage::Copy)->setShortcut(QKeySequence::Copy);
-    view->pageAction(QWebPage::Paste)->setShortcut(QKeySequence::Paste);
-    zoomIn->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Plus));
-    zoomOut->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus));
-    resetZoom->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_0));
-    view->pageAction(QWebPage::ToggleBold)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
-    view->pageAction(QWebPage::ToggleItalic)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
-    view->pageAction(QWebPage::ToggleUnderline)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
 
-    QAction* focusAddressBar = new QAction(this);
+    QAction* focusAddressBar = new QAction(tr("Open Location..."), this);
     // Add the location bar shortcuts familiar to users from other browsers
     QList<QKeySequence> editUrlShortcuts;
     editUrlShortcuts.append(QKeySequence(Qt::ControlModifier + Qt::Key_L));
@@ -209,5 +176,50 @@ void MainWindow::createMenus() {
     connect(focusAddressBar, SIGNAL(triggered()),
             this, SLOT(selectLineEdit()));
     fileMenu->addAction(focusAddressBar);
+
+    fileMenu->addAction(tr("Print"), this, SLOT(print()));
+    fileMenu->addAction(tr("Close"), this, SLOT(close()));
+}
+
+void MainWindow::createEditMenu() {
+    QMenu *editMenu = menuBar()->addMenu("&Edit");
+    editMenu->addAction(view->pageAction(QWebPage::Undo));
+    editMenu->addAction(view->pageAction(QWebPage::Redo));
+    editMenu->addSeparator();
+    editMenu->addAction(view->pageAction(QWebPage::Cut));
+    editMenu->addAction(view->pageAction(QWebPage::Copy));
+    editMenu->addAction(view->pageAction(QWebPage::Paste));
+    editMenu->addSeparator();
+    QAction *setEditable = editMenu->addAction(tr("Set Editable"), this, SLOT(setEditable(bool)));
+    setEditable->setCheckable(true);
+}
+
+void MainWindow::createViewMenu() {
+    QMenu *viewMenu = menuBar()->addMenu("&View");
+    viewMenu->addAction(view->pageAction(QWebPage::Stop));
+    viewMenu->addAction(view->pageAction(QWebPage::Reload));
+    viewMenu->addSeparator();
+
+    QAction *zoomIn = viewMenu->addAction("Zoom &In", this, SLOT(zoomIn()));
+    zoomIn->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Plus));
+
+    QAction *zoomOut = viewMenu->addAction("Zoom &Out", this, SLOT(zoomOut()));
+    zoomOut->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus));
+
+    QAction *resetZoom = viewMenu->addAction("Reset Zoom", this, SLOT(resetZoom()));
+    resetZoom->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_0));
+
+    QAction *zoomTextOnly = viewMenu->addAction("Zoom Text Only", this, SLOT(toggleZoomTextOnly(bool)));
+    zoomTextOnly->setCheckable(true);
+    zoomTextOnly->setChecked(false);
+
+    viewMenu->addSeparator();
+    viewMenu->addAction("Dump HTML", this, SLOT(dumpHtml()));
+}
+
+void MainWindow::createHelpMenu() {
+    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+    QAction *about = helpMenu->addAction(tr("A&bout ") + qApp->applicationName(), this, SLOT(aboutMe()));
+    Q_UNUSED(about);
 }
 

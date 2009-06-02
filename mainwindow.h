@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "lineedit.h"
+#include "aboutdialog.h"
 
 #include <qwebview.h>
 #include <qwebframe.h>
@@ -25,7 +26,7 @@ public:
 protected slots:
 
     void loadUrl(const QUrl& url) {
-        fprintf(stderr, "Loading new url...");
+        //fprintf(stderr, "Loading new url...");
         view->load(url);
         view->setFocus(Qt::OtherFocusReason);
     }
@@ -36,9 +37,10 @@ protected slots:
 
     void setWindowTitle(const QString& title) {
         if (title.isNull()) {
-            ((QMainWindow*)this)->setWindowTitle("QtLauncher");
+            ((QMainWindow*)this)->setWindowTitle(qApp->applicationName());
         } else {
-            ((QMainWindow*)this)->setWindowTitle(QString("QtLauncher - ") + title);
+            ((QMainWindow*)this)->setWindowTitle(
+                qApp->applicationName() + " - " + title);
         }
     }
 
@@ -112,6 +114,10 @@ protected slots:
         qDebug() << "HTML: " << view->page()->mainFrame()->toHtml();
     }
 
+    void aboutMe() {
+        AboutDialog* about = new AboutDialog(this);
+        about->show();
+    }
 
 private:
 
@@ -125,7 +131,13 @@ private:
     void createWebView();
     void createSideBar();
     void createToolBar();
+
     void createMenus();
+    void createFileMenu();
+    void createEditMenu();
+    void createViewMenu();
+    void createHelpMenu();
+
     void createProgressBar();
     void createUrlEdit();
 
