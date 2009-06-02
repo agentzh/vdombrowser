@@ -1,8 +1,10 @@
 TEMPLATE = app
-SOURCES += main.cpp
+SOURCES += mainwindow.cpp webpage.cpp main.cpp
+HEADERS += mainwindow.h webpage.h
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
 DESTDIR = .
+#LIBS += -lfcgi
 
 QT+=xml network webkit
 QMAKE_RPATHDIR = $$OUTPUT_DIR/lib $$QMAKE_RPATHDIR

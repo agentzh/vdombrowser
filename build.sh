@@ -7,6 +7,6 @@ if [ -z "$QTDIR" ]; then
 fi
 export PATH=$QTDIR/bin:$PATH
 qmake  "CONFIG-=debug" -r
-make clean
+#make clean
 make
 
