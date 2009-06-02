@@ -3,6 +3,7 @@
 
 #include "lineedit.h"
 #include "aboutdialog.h"
+#include "hunterconfigdialog.h"
 
 #include <qwebview.h>
 #include <qwebframe.h>
@@ -167,6 +168,7 @@ private:
     LineEdit *urlEdit;
     QWidget *sidebar;
     QProgressBar *progress;
+    HunterConfigDialog* hunterConfig;
 
     QStringList urlList;
     QStringListModel urlModel;

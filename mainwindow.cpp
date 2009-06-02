@@ -3,6 +3,10 @@
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
+    hunterConfig = new HunterConfigDialog(this);
+    connect(hunterConfig, SIGNAL(accepted()),
+            this, SLOT(loadFinished()));
+
     settings = new QSettings(
         QSettings::UserScope,
         qApp->organizationDomain(),
@@ -68,6 +72,7 @@ void MainWindow::setupUI() {
     createUrlEdit();
     createToolBar();
     createMenus();
+    //hunterConfig->hide();
 }
 
 void MainWindow::createCentralWidget() {
@@ -232,28 +237,30 @@ void MainWindow::createViewMenu() {
 }
 
 void MainWindow::createSettingsMenu() {
-    QMenu *settingsMenu = menuBar()->addMenu(tr("&Settings"));
+    QMenu *prefMenu = menuBar()->addMenu(tr("&Preferences"));
 
     {
-        QAction *enableJS = settingsMenu->addAction(tr("Enable &Javascript"), this, SLOT(toggleEnableJavascript(bool)));
+        QAction *enableJS = prefMenu->addAction(tr("Enable &Javascript"), this, SLOT(toggleEnableJavascript(bool)));
         enableJS->setCheckable(true);
         enableJS->setChecked(m_enableJavascript);
     }
     {
-        QAction *enableImages = settingsMenu->addAction(tr("Enable &Images"), this, SLOT(toggleEnableImages(bool)));
+        QAction *enableImages = prefMenu->addAction(tr("Enable &Images"), this, SLOT(toggleEnableImages(bool)));
         enableImages->setCheckable(true);
         enableImages->setChecked(m_enableImages);
     }
     {
-        QAction *enablePlugins = settingsMenu->addAction(tr("Enable &Plugins"), this, SLOT(toggleEnablePlugins(bool)));
+        QAction *enablePlugins = prefMenu->addAction(tr("Enable &Plugins"), this, SLOT(toggleEnablePlugins(bool)));
         enablePlugins->setCheckable(true);
         enablePlugins->setChecked(m_enablePlugins);
     }
     {
-        QAction *enableJava = settingsMenu->addAction(tr("Enable J&ava"), this, SLOT(toggleEnableJava(bool)));
+        QAction *enableJava = prefMenu->addAction(tr("Enable J&ava"), this, SLOT(toggleEnableJava(bool)));
         enableJava->setCheckable(true);
         enableJava->setChecked(m_enableJava);
     }
+    prefMenu->addSeparator();
+    prefMenu->addAction(tr("X &Hunter"), hunterConfig, SLOT(exec()));
 }
 
 void MainWindow::createHelpMenu() {

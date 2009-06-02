@@ -1,11 +1,13 @@
 TEMPLATE = app
 SOURCES += aboutdialog.cpp \
+           hunterconfigdialog.cpp \
            lineedit.cpp \
            urlloader.cpp \
            mainwindow.cpp \
            webpage.cpp \
            main.cpp
 HEADERS += aboutdialog.h \
+           hunterconfigdialog.h \
            version.h \
            lineedit.h \
            urlloader.h \
