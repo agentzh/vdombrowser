@@ -1,0 +1,20 @@
+If you want to use VdomBrowser with QtWebKit trunk you need to get a copy WebKit trunk as well at Qt 4.5. Setting the environment variables QT_WEBKIT and WEBKITDIR and rebuilding VdomBrowser will cause it to use QtWebKit trunk. See the file 'VdomBrowser.pro' in VdomBrowser's source for more details and customizations you might need to do to point it to the location of your QtWebKit checkout.
+
+Simple steps to build QtWebKit trunk:
+
+    $ svn checkout http://svn.webkit.org/repository/webkit/trunk WebKit
+    $ cd WebKit
+    $ ./WebKitTools/Scripts/build-webkit --qt --release
+
+WebKit will be built in the subdirectory WebKitBuild/Release/
+
+And the build VdomBrowser with it:
+
+    $ cd /path/to/VdomBrowser/source
+    $ export QT_WEBKIT=webkit_trunk
+    # WEBKITDIR should be set to the parent directory of WebKitBuild
+    $ export WEBKITDIR=$HOME/dev/webkit
+    $ /path/to/your/qt4.5/bin/qmake  "CONFIG-=debug" -r
+    $ make clean
+    $ make
+
