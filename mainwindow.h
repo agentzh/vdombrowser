@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "lineedit.h"
+
 #include <qwebview.h>
 #include <qwebframe.h>
 #include <qwebsettings.h>
@@ -110,6 +112,7 @@ protected slots:
         qDebug() << "HTML: " << view->page()->mainFrame()->toHtml();
     }
 
+
 private:
 
     QVector<int> zoomLevels;
@@ -117,9 +120,13 @@ private:
 
     // create the status bar, tool bar & menu
     void setupUI();
+    void createToolBar();
+    void createMenus();
+    void createProgressBar();
+    void createUrlEdit();
 
     QWebView *view;
-    QLineEdit *urlEdit;
+    LineEdit *urlEdit;
     QProgressBar *progress;
 
     QAction *formatMenuAction;

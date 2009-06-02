@@ -69,6 +69,25 @@ void MainWindow::loadFinished() {
 }
 
 void MainWindow::setupUI() {
+    createProgressBar();
+    createUrlEdit();
+    createToolBar();
+    createMenus();
+}
+
+void MainWindow::createUrlEdit() {
+    urlEdit = new LineEdit(this);
+    urlEdit->setSizePolicy(QSizePolicy::Expanding, urlEdit->sizePolicy().verticalPolicy());
+
+    connect(urlEdit, SIGNAL(returnPressed()),
+            SLOT(changeLocation()));
+
+    QCompleter *completer = new QCompleter(this);
+    urlEdit->setCompleter(completer);
+    completer->setModel(&urlModel);
+}
+
+void MainWindow::createProgressBar() {
     progress = new QProgressBar(this);
     progress->setRange(0, 100);
     progress->setMinimumSize(100, 20);
@@ -79,22 +98,18 @@ void MainWindow::setupUI() {
     connect(view, SIGNAL(loadProgress(int)), progress, SLOT(show()));
     connect(view, SIGNAL(loadProgress(int)), progress, SLOT(setValue(int)));
     connect(view, SIGNAL(loadFinished(bool)), progress, SLOT(hide()));
+}
 
-    urlEdit = new QLineEdit(this);
-    urlEdit->setSizePolicy(QSizePolicy::Expanding, urlEdit->sizePolicy().verticalPolicy());
-    connect(urlEdit, SIGNAL(returnPressed()),
-            SLOT(changeLocation()));
-    QCompleter *completer = new QCompleter(this);
-    urlEdit->setCompleter(completer);
-    completer->setModel(&urlModel);
-
+void MainWindow::createToolBar() {
     QToolBar *bar = addToolBar("Navigation");
     bar->addAction(view->pageAction(QWebPage::Back));
     bar->addAction(view->pageAction(QWebPage::Forward));
     bar->addAction(view->pageAction(QWebPage::Reload));
     bar->addAction(view->pageAction(QWebPage::Stop));
     bar->addWidget(urlEdit);
+}
 
+void MainWindow::createMenus() {
     QMenu *fileMenu = menuBar()->addMenu("&File");
     QAction *newWindow = fileMenu->addAction("New Window", this, SLOT(newWindow()));
 #if QT_VERSION >= 0x040400

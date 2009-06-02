@@ -8,6 +8,6 @@ fi
 export PATH=$QTDIR/bin:$PATH
 qmake "CONFIG-=debug" -r
 #qmake -r
-make clean
+#make clean
 make
 

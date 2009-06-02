@@ -1,10 +1,10 @@
 TEMPLATE = app
-SOURCES += urlloader.cpp mainwindow.cpp webpage.cpp main.cpp
-HEADERS += urlloader.h mainwindow.h webpage.h
+SOURCES += lineedit.cpp urlloader.cpp mainwindow.cpp webpage.cpp main.cpp
+HEADERS += lineedit.h urlloader.h mainwindow.h webpage.h
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
 DESTDIR = .
-#LIBS += -lfcgi
+LIBS += -lqjson
 
 QT+=xml network webkit
 QMAKE_RPATHDIR = $$OUTPUT_DIR/lib $$QMAKE_RPATHDIR
@@ -25,7 +25,7 @@ webkit_trunk {
     QT -= webkit
     DEFINES += WEBKIT_TRUNK
     QMAKE_LIBDIR_FLAGS = -L$$WEBKITBUILD
-    LIBS = -L$$WEBKITBUILD -lQtWebKit
+    LIBS += -L$$WEBKITBUILD -lQtWebKit
     INCLUDEPATH = $$WEBKITDIR/WebKit/qt/Api $$INCLUDEPATH
     QMAKE_RPATHDIR = $$WEBKITBUILD $$QMAKE_RPATHDIR
 }
