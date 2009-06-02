@@ -110,9 +110,11 @@ protected slots:
         formatMenuAction->setVisible(on);
     }
 
+/*
     void dumpHtml() {
         qDebug() << "HTML: " << view->page()->mainFrame()->toHtml();
     }
+*/
 
     void aboutMe() {
         AboutDialog* about = new AboutDialog(this);

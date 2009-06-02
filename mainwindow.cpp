@@ -189,9 +189,9 @@ void MainWindow::createEditMenu() {
     editMenu->addAction(view->pageAction(QWebPage::Cut));
     editMenu->addAction(view->pageAction(QWebPage::Copy));
     editMenu->addAction(view->pageAction(QWebPage::Paste));
-    editMenu->addSeparator();
-    QAction *setEditable = editMenu->addAction(tr("Set Editable"), this, SLOT(setEditable(bool)));
-    setEditable->setCheckable(true);
+    //editMenu->addSeparator();
+    //QAction *setEditable = editMenu->addAction(tr("Set Editable"), this, SLOT(setEditable(bool)));
+    //setEditable->setCheckable(true);
 }
 
 void MainWindow::createViewMenu() {
@@ -213,8 +213,8 @@ void MainWindow::createViewMenu() {
     zoomTextOnly->setCheckable(true);
     zoomTextOnly->setChecked(false);
 
-    viewMenu->addSeparator();
-    viewMenu->addAction("Dump HTML", this, SLOT(dumpHtml()));
+    //viewMenu->addSeparator();
+    //viewMenu->addAction("Dump HTML", this, SLOT(dumpHtml()));
 }
 
 void MainWindow::createHelpMenu() {
