@@ -120,13 +120,20 @@ private:
 
     // create the status bar, tool bar & menu
     void setupUI();
+
+    void createCentralWidget();
+    void createSideBar();
     void createToolBar();
     void createMenus();
     void createProgressBar();
     void createUrlEdit();
 
+    QTextEdit* itemInfoEdit;
+    QTextEdit* pageInfoEdit;
+
     QWebView *view;
     LineEdit *urlEdit;
+    QWidget *sidebar;
     QProgressBar *progress;
 
     QAction *formatMenuAction;

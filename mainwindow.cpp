@@ -2,21 +2,6 @@
 #include "webpage.h"
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
-    view = new QWebView(this);
-    setCentralWidget(view);
-
-    view->setPage(new WebPage(view));
-
-    connect(view, SIGNAL(loadFinished(bool)),
-            this, SLOT(loadFinished()));
-    connect(view, SIGNAL(titleChanged(const QString&)),
-            this, SLOT(setWindowTitle(const QString&)));
-    connect(view->page(), SIGNAL(linkHovered(const QString&, const QString&, const QString &)),
-            this, SLOT(showLinkHover(const QString&, const QString&)));
-    connect(view->page(), SIGNAL(windowCloseRequested()), this, SLOT(deleteLater()));
-    connect(view, SIGNAL(urlChanged(const QUrl&)), this, SLOT(updateUrl(const QUrl&)));
-    connect(view, SIGNAL(linkClicked(const QUrl&)), this, SLOT(loadUrl(const QUrl&)));
-
     setupUI();
 
     QUrl qurl;
@@ -69,10 +54,53 @@ void MainWindow::loadFinished() {
 }
 
 void MainWindow::setupUI() {
+    createCentralWidget();
     createProgressBar();
     createUrlEdit();
     createToolBar();
     createMenus();
+}
+
+void MainWindow::createCentralWidget() {
+    QSplitter* splitter = new QSplitter(this);
+    view = new QWebView(splitter);
+    splitter->addWidget(view);
+
+    sidebar = new QWidget;
+    QVBoxLayout *sidebarLayout = new QVBoxLayout;
+    sidebar->setLayout(sidebarLayout);
+
+    QLabel* label = new QLabel(tr("Active item description"), sidebar);
+    sidebarLayout->addWidget(label);
+    itemInfoEdit = new QTextEdit(sidebar);
+    itemInfoEdit->setReadOnly(true);
+    sidebarLayout->addWidget(itemInfoEdit);
+
+    label = new QLabel(tr("Page item summary"), sidebar);
+    sidebarLayout->addWidget(label);
+    pageInfoEdit = new QTextEdit(sidebar);
+    pageInfoEdit->setReadOnly(true);
+    sidebarLayout->addWidget(pageInfoEdit);
+
+    splitter->addWidget(view);
+    splitter->addWidget(sidebar);
+
+    setCentralWidget(splitter);
+
+    view->setPage(new WebPage(view));
+
+    connect(view, SIGNAL(loadFinished(bool)),
+            this, SLOT(loadFinished()));
+    connect(view, SIGNAL(titleChanged(const QString&)),
+            this, SLOT(setWindowTitle(const QString&)));
+    connect(view->page(), SIGNAL(linkHovered(const QString&, const QString&, const QString &)),
+            this, SLOT(showLinkHover(const QString&, const QString&)));
+    connect(view->page(), SIGNAL(windowCloseRequested()), this, SLOT(deleteLater()));
+    connect(view, SIGNAL(urlChanged(const QUrl&)), this, SLOT(updateUrl(const QUrl&)));
+    connect(view, SIGNAL(linkClicked(const QUrl&)), this, SLOT(loadUrl(const QUrl&)));
+}
+
+void MainWindow::createSideBar() {
 }
 
 void MainWindow::createUrlEdit() {
