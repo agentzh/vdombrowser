@@ -44,17 +44,17 @@ void AboutDialog::setupUi(QDialog *AboutDialog) {
     AboutDialog->setModal(true);
     verticalLayout = new QVBoxLayout(AboutDialog);
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-    logo = new QLabel(AboutDialog);
-    logo->setObjectName(QString::fromUtf8("logo"));
+    //logo = new QLabel(AboutDialog);
+    //logo->setObjectName(QString::fromUtf8("logo"));
     QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(logo->sizePolicy().hasHeightForWidth());
-    logo->setSizePolicy(sizePolicy);
-    logo->setScaledContents(false);
-    logo->setAlignment(Qt::AlignCenter);
+    //sizePolicy.setHeightForWidth(logo->sizePolicy().hasHeightForWidth());
+    //logo->setSizePolicy(sizePolicy);
+    //logo->setScaledContents(false);
+    //logo->setAlignment(Qt::AlignCenter);
 
-    verticalLayout->addWidget(logo);
+    //verticalLayout->addWidget(logo);
 
     name = new QLabel(AboutDialog);
     name->setObjectName(QString::fromUtf8("name"));
@@ -136,7 +136,7 @@ void AboutDialog::setupUi(QDialog *AboutDialog) {
 } // setupUi
 
 void AboutDialog::retranslateUi(QDialog *AboutDialog) {
-    logo->setText(QString());
+    //logo->setText(QString());
     name->setText(QString());
     version->setText(QString());
     description->setText(QApplication::translate("AboutDialog", "QtWebKit-based VDOM Browser for X Hunter", 0, QApplication::UnicodeUTF8));
@@ -144,8 +144,8 @@ void AboutDialog::retranslateUi(QDialog *AboutDialog) {
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\"font-size:9pt;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Copyright \302\251 2007-2009 Benjamin C. Meyer &lt;<a href=\"mailto:ben@meyerhome.net\"><span style=\" text-decoration: underline; color:#0057ae;\">ben@meyerhome.net</span></a>&gt;</p></body></html>", 0, QApplication::UnicodeUTF8));
-    sitelink->setText(QApplication::translate("AboutDialog", "<a href=\"http://www.eeeeworks.org\">http://www.eeeeworks.org</a>", 0, QApplication::UnicodeUTF8));
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Copyright \302\251 2009 Agent Zhang (agentzh) &lt;<a href=\"mailto:agentzh@yahoo.cn\"><span style=\" text-decoration: underline; color:#0057ae;\">agentzh@yahoo.cn</span></a>&gt;</p></body></html>", 0, QApplication::UnicodeUTF8));
+    sitelink->setText(QApplication::translate("AboutDialog", "<a href=\"http://www.eeeeworks.org/#posts/1\">http://www.eeeeworks.org</a>", 0, QApplication::UnicodeUTF8));
     closeButton->setText(QApplication::translate("AboutDialog", "Close", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(AboutDialog);
 } // retranslateUi
