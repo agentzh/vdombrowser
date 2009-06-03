@@ -9,5 +9,5 @@ export PATH=$QTDIR/bin:$PATH
 qmake "CONFIG-=debug" -r
 #qmake -r
 #make clean
-make
+make -j2
 

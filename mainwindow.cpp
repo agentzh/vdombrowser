@@ -7,6 +7,14 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     connect(hunterConfig, SIGNAL(accepted()),
             this, SLOT(saveHunterConfig()));
 
+    connect(&m_hunter, SIGNAL(readyReadStandardOutput()),
+            this, SLOT(emitHunterStdout()));
+    connect(&m_hunter, SIGNAL(readyReadStandardError()),
+            this, SLOT(emitHunterStderr()));
+    connect(&m_hunter, SIGNAL(finished(int, QProcess::ExitStatus)),
+            this, SLOT(hunterFinished(int, QProcess::ExitStatus)));
+    connect(&m_hunter, SIGNAL(started()), this, SLOT(hunterStarted()));
+
     settings = new QSettings(
         QSettings::UserScope,
         qApp->organizationDomain(),
@@ -51,25 +59,6 @@ void MainWindow::changeLocation() {
 
 void MainWindow::loadFinished() {
     urlEdit->setText(view->url().toEncoded());
-    if (m_hunterEnabled) {
-        const QByteArray& vdom = m_webvdom->dump();
-        //qDebug() << QString::fromUtf8(vdom);
-        QFile file(m_vdomPath);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::warning(this, tr("VDOM Dumper"),
-                QString("Failed to open file ") +
-                m_vdomPath + " for writing: " +
-                file.errorString(), QMessageBox::NoButton);
-        } else {
-            if (file.write(vdom) == -1) {
-                QMessageBox::warning(this, tr("VDOM Dumper"),
-                    QString("Failed to write VDOM dump to file ") +
-                    m_vdomPath + ": " +
-                    file.errorString(), QMessageBox::NoButton);
-            }
-            file.close();
-        }
-    }
 
     QUrl::FormattingOptions opts;
     opts |= QUrl::RemoveScheme;
@@ -83,6 +72,37 @@ void MainWindow::loadFinished() {
     if (!urlList.contains(s))
         urlList += s;
     urlModel.setStringList(urlList);
+
+    if (m_hunterEnabled) {
+        /* dump VDOM to the external file */
+        const QByteArray& vdom = m_webvdom->dump();
+        //qDebug() << QString::fromUtf8(vdom);
+        QFile file(m_vdomPath);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, tr("VDOM Dumper"),
+                QString("Failed to open file ") +
+                m_vdomPath + " for writing: " +
+                file.errorString(), QMessageBox::NoButton);
+            return;
+        }
+        if (file.write(vdom) == -1) {
+            QMessageBox::warning(this, tr("VDOM Dumper"),
+                QString("Failed to write VDOM dump to file ") +
+                m_vdomPath + ": " +
+                file.errorString(), QMessageBox::NoButton);
+            file.close();
+            return;
+        }
+        file.close();
+
+        /* execute the external hunter program */
+        m_hunter.close();
+        QStringList args;
+        args << m_vdomPath;
+        m_pageInfoEdit->clear();
+        statusBar()->showMessage("Starting " + m_hunterPath + "...");
+        m_hunter.start(m_hunterPath, args);
+    }
 }
 
 void MainWindow::setupUI() {
@@ -147,15 +167,15 @@ void MainWindow::createSideBar() {
 
     QLabel* label = new QLabel(tr("Active item description"), sidebar);
     sidebarLayout->addWidget(label);
-    itemInfoEdit = new QTextEdit(sidebar);
-    itemInfoEdit->setReadOnly(true);
-    sidebarLayout->addWidget(itemInfoEdit);
+    m_itemInfoEdit = new QTextEdit(sidebar);
+    m_itemInfoEdit->setReadOnly(true);
+    sidebarLayout->addWidget(m_itemInfoEdit);
 
     label = new QLabel(tr("Page item summary"), sidebar);
     sidebarLayout->addWidget(label);
-    pageInfoEdit = new QTextEdit(sidebar);
-    pageInfoEdit->setReadOnly(true);
-    sidebarLayout->addWidget(pageInfoEdit);
+    m_pageInfoEdit = new QTextEdit(sidebar);
+    m_pageInfoEdit->setReadOnly(true);
+    sidebarLayout->addWidget(m_pageInfoEdit);
 }
 
 void MainWindow::createUrlEdit() {
@@ -332,3 +352,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     event->accept();
 }
 
+void MainWindow::saveHunterConfig() {
+    m_hunterEnabled = hunterConfig->hunterEnabled();
+    //m_hunterPath = hunterConfig->progPath();
+    m_hunterPath = hunterConfig->progPath();
+    m_vdomPath   = hunterConfig->vdomPath();
+    //qDebug() << "Saving hunter config... (hunter: " << m_hunterPath << ")";
+}

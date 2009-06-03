@@ -23,7 +23,7 @@ public:
         vdomPathEdit->setText(path);
     }
 
-    bool hunterEnabled() const {
+    bool hunterEnabled() {
         return formGroup->isChecked();
     }
 

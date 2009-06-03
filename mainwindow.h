@@ -31,6 +31,30 @@ protected:
 
 protected slots:
 
+    void hunterStarted() {
+        statusBar()->showMessage("Hunter " + m_hunterPath + " started.");
+    }
+
+    void hunterFinished(int exitCode, QProcess::ExitStatus) {
+        if (exitCode != 0) {
+            m_pageInfoEdit->append("Failed to spawn X Hunter " +
+                m_hunterPath + ": " + m_hunter.errorString() +
+                ": Process returns exit code " + m_hunter.exitCode());
+            return;
+        }
+        statusBar()->showMessage(
+            QString("Finished running X Hunter %1. (exit code: %2)")
+                    .arg(m_hunterPath).arg(exitCode));
+    }
+
+    void emitHunterStdout() {
+        m_pageInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardOutput()));
+    }
+
+    void emitHunterStderr() {
+        m_pageInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardError()));
+    }
+
     void loadUrl(const QUrl& url) {
         //fprintf(stderr, "Loading new url...");
         view->load(url);
@@ -136,11 +160,7 @@ protected slots:
         view->page()->settings()->setAttribute(QWebSettings::PluginsEnabled, enabled);
     }
 
-    void saveHunterConfig() {
-        m_hunterEnabled = hunterConfig->hunterEnabled();
-        m_hunterPath = hunterConfig->progPath();
-        m_vdomPath   = hunterConfig->vdomPath();
-    }
+    void saveHunterConfig();
 
     void execHunterConfig() {
         initHunterConfig();
@@ -179,8 +199,8 @@ private:
     void writeSettings();
     void readSettings();
 
-    QTextEdit* itemInfoEdit;
-    QTextEdit* pageInfoEdit;
+    QTextEdit* m_itemInfoEdit;
+    QTextEdit* m_pageInfoEdit;
 
     QWebView *view;
     LineEdit *urlEdit;
@@ -202,6 +222,7 @@ private:
     QString m_vdomPath;
 
     QWebVDom* m_webvdom;
+    QProcess m_hunter;
 };
 
 #endif
