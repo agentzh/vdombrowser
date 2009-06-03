@@ -36,20 +36,9 @@ public:
     }
 
 public slots:
-    virtual void accept() {
-        //qDebug() << "Checking form values...\n";
-        if (formGroup->isChecked()) {
-            if (progPathEdit->text().isEmpty()) {
-                croak(tr("Hunter Program Path is empty."));
-                return;
-            }
-            if (vdomPathEdit->text().isEmpty()) {
-                croak(tr("VDOM Output File Path is empty."));
-                return;
-            }
-        }
-        QDialog::accept();
-    }
+    virtual void accept();
+    void browseProgFile();
+    void browseVdomFile();
 
 private:
     void croak(const QString& msg) {
