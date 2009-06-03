@@ -42,7 +42,7 @@ public slots:
 
 private:
     void croak(const QString& msg) {
-        QMessageBox::warning(this, tr("X Hunter Configuration Error"),
+        QMessageBox::warning(this, tr("X Hunter Configuration"),
             msg, QMessageBox::NoButton);
     }
     QLineEdit* progPathEdit;

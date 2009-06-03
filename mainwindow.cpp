@@ -51,6 +51,25 @@ void MainWindow::changeLocation() {
 
 void MainWindow::loadFinished() {
     urlEdit->setText(view->url().toEncoded());
+    if (m_hunterEnabled) {
+        const QByteArray& vdom = m_webvdom->dump();
+        //qDebug() << QString::fromUtf8(vdom);
+        QFile file(m_vdomPath);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, tr("VDOM Dumper"),
+                QString("Failed to open file ") +
+                m_vdomPath + " for writing: " +
+                file.errorString(), QMessageBox::NoButton);
+        } else {
+            if (file.write(vdom) == -1) {
+                QMessageBox::warning(this, tr("VDOM Dumper"),
+                    QString("Failed to write VDOM dump to file ") +
+                    m_vdomPath + ": " +
+                    file.errorString(), QMessageBox::NoButton);
+            }
+            file.close();
+        }
+    }
 
     QUrl::FormattingOptions opts;
     opts |= QUrl::RemoveScheme;
@@ -95,6 +114,7 @@ void MainWindow::createWebView() {
     page->settings()->setAttribute(QWebSettings::JavaEnabled, m_enableJava);
 
     view->setPage(page);
+    m_webvdom = new QWebVDom(page->mainFrame());
 
     connect(view, SIGNAL(loadFinished(bool)),
             this, SLOT(loadFinished()));

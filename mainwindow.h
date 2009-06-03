@@ -5,6 +5,7 @@
 #include "aboutdialog.h"
 #include "hunterconfigdialog.h"
 
+#include <qwebvdom.h> /* added to WebCore by Yahoo! China EEEE */
 #include <qwebview.h>
 #include <qwebframe.h>
 #include <qwebsettings.h>
@@ -199,6 +200,8 @@ private:
     bool m_hunterEnabled;
     QString m_hunterPath;
     QString m_vdomPath;
+
+    QWebVDom* m_webvdom;
 };
 
 #endif
