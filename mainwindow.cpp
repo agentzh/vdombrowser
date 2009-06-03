@@ -129,7 +129,7 @@ void MainWindow::createWebView() {
     view->pageAction(QWebPage::Back)->setShortcut(QKeySequence::Back);
     view->pageAction(QWebPage::Stop)->setShortcut(Qt::Key_Escape);
     view->pageAction(QWebPage::Forward)->setShortcut(QKeySequence::Forward);
-    view->pageAction(QWebPage::Reload)->setShortcut(QKeySequence::Refresh);
+    view->pageAction(QWebPage::Reload)->setShortcut(Qt::Key_F5);
     view->pageAction(QWebPage::Undo)->setShortcut(QKeySequence::Undo);
     view->pageAction(QWebPage::Redo)->setShortcut(QKeySequence::Redo);
     view->pageAction(QWebPage::Cut)->setShortcut(QKeySequence::Cut);
