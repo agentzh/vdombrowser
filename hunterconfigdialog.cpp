@@ -56,7 +56,7 @@ HunterConfigDialog::HunterConfigDialog(QWidget *parent): QDialog(parent) {
     //layout->addStretch();
 
     setLayout(layout);
-    setFixedSize(QSize(550, 200));
+    setFixedSize(QSize(700, 200));
     setWindowTitle(tr("X Hunter Configuration"));
 }
 
