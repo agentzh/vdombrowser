@@ -3,6 +3,7 @@
 
 #include <qdialog.h>
 #include <QtGui>
+//#include <QDebug>
 
 class HunterConfigDialog: public QDialog {
     Q_OBJECT
@@ -34,7 +35,27 @@ public:
         return vdomPathEdit->text();
     }
 
+public slots:
+    virtual void accept() {
+        //qDebug() << "Checking form values...\n";
+        if (formGroup->isChecked()) {
+            if (progPathEdit->text().isEmpty()) {
+                croak(tr("Hunter Program Path is empty."));
+                return;
+            }
+            if (vdomPathEdit->text().isEmpty()) {
+                croak(tr("VDOM Output File Path is empty."));
+                return;
+            }
+        }
+        QDialog::accept();
+    }
+
 private:
+    void croak(const QString& msg) {
+        QMessageBox::warning(this, tr("X Hunter Configuration Error"),
+            msg, QMessageBox::NoButton);
+    }
     QLineEdit* progPathEdit;
     QLineEdit* vdomPathEdit;
     QGroupBox* formGroup;

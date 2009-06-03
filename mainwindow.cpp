@@ -260,7 +260,7 @@ void MainWindow::createSettingsMenu() {
         enableJava->setChecked(m_enableJava);
     }
     prefMenu->addSeparator();
-    prefMenu->addAction(tr("X &Hunter"), hunterConfig, SLOT(exec()));
+    prefMenu->addAction(tr("X &Hunter"), this, SLOT(execHunterConfig()));
 }
 
 void MainWindow::createHelpMenu() {
@@ -300,13 +300,9 @@ void MainWindow::readSettings() {
     m_enableJava = settings->value("enableJava").toBool();
 
     m_hunterEnabled = settings->value("hunterEnabled").toBool();
-    hunterConfig->setHunterEnabled(m_hunterEnabled);
-
     m_hunterPath = settings->value("hunterPath").toString();
-    hunterConfig->setProgPath(m_hunterPath);
-
     m_vdomPath   = settings->value("vdomPath").toString();
-    hunterConfig->setVdomPath(m_vdomPath);
+    initHunterConfig();
 
     settings->endGroup();
 }

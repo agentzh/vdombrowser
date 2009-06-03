@@ -141,7 +141,18 @@ protected slots:
         m_vdomPath   = hunterConfig->vdomPath();
     }
 
+    void execHunterConfig() {
+        initHunterConfig();
+        hunterConfig->exec();
+    }
+
 private:
+
+    void initHunterConfig() {
+        hunterConfig->setHunterEnabled(m_hunterEnabled);
+        hunterConfig->setProgPath(m_hunterPath);
+        hunterConfig->setVdomPath(m_vdomPath);
+    }
 
     QVector<int> zoomLevels;
     int currentZoom;
