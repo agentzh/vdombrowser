@@ -438,11 +438,10 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     QVariant programMeta = root["program"];
     if (!programMeta.isNull() && programMeta.canConvert<QString>()) {
         m_hunterLabel->setText(programMeta.toString());
-        m_hunterLabel->show();
     } else {
         m_hunterLabel->setText(tr("Unknown hunter"));
-        m_hunterLabel->show();
     }
+    m_hunterLabel->show();
 }
 
 void MainWindow::annotateWebPage(const QVariant& map) {
