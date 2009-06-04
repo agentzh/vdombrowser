@@ -201,6 +201,7 @@ private:
     QWidget *m_sidebar;
     QProgressBar *m_progress;
     HunterConfigDialog* m_hunterConfig;
+    QLabel *m_hunterLabel;
 
     QStringList m_urlList;
     QStringListModel m_urlCompleterModel;

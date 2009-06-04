@@ -101,6 +101,7 @@ void MainWindow::loadFinished() {
         args << m_vdomPath;
         m_itemInfoEdit->clear();
         m_pageInfoEdit->clear();
+        m_hunterLabel->hide();
         statusBar()->showMessage("Starting " + m_hunterPath + "...");
         m_hunter.start(m_hunterPath, args);
     }
@@ -200,7 +201,10 @@ void MainWindow::createProgressBar() {
     m_progress->hide();
     statusBar()->addPermanentWidget(m_progress);
 
-
+    m_hunterLabel = new QLabel(this);
+    m_hunterLabel->hide();
+    m_hunterLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    statusBar()->addPermanentWidget(m_hunterLabel);
 
     connect(m_view, SIGNAL(loadProgress(int)), m_progress, SLOT(show()));
     connect(m_view, SIGNAL(loadProgress(int)), m_progress, SLOT(setValue(int)));
@@ -430,9 +434,15 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     }
     const QVariantMap root = res.toMap();
     annotateWebPage(root);
+
+    QVariant programMeta = root["program"];
+    if (!programMeta.isNull() && programMeta.canConvert<QString>()) {
+        m_hunterLabel->setText(programMeta.toString());
+        m_hunterLabel->show();
+    }
 }
 
 void MainWindow::annotateWebPage(const QVariant& map) {
-
+    Q_UNUSED(map)
 }
 
