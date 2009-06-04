@@ -3,8 +3,8 @@
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
-    hunterConfig = new HunterConfigDialog(this);
-    connect(hunterConfig, SIGNAL(accepted()),
+    m_hunterConfig = new HunterConfigDialog(this);
+    connect(m_hunterConfig, SIGNAL(accepted()),
             this, SLOT(saveHunterConfig()));
 
     connect(&m_hunter, SIGNAL(readyReadStandardOutput()),
@@ -15,7 +15,7 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
             this, SLOT(hunterFinished(int, QProcess::ExitStatus)));
     connect(&m_hunter, SIGNAL(started()), this, SLOT(hunterStarted()));
 
-    settings = new QSettings(
+    m_settings = new QSettings(
         QSettings::UserScope,
         qApp->organizationDomain(),
         qApp->applicationName(),
@@ -28,8 +28,8 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QUrl qurl;
     qurl.setEncodedUrl(url.toUtf8(), QUrl::StrictMode);
     if (qurl.isValid()) {
-        urlEdit->setText(qurl.toString());
-        view->load(qurl);
+        m_urlEdit->setText(qurl.toString());
+        m_view->load(qurl);
 
         // the zoom values are chosen to be like in Mozilla Firefox 3
         zoomLevels << 30 << 50 << 67 << 80 << 90;
@@ -41,7 +41,7 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
 void MainWindow::changeLocation() {
     //QUrl url = guessUrlFromString(urlEdit->text());
     //
-    QString urlStr = urlEdit->text().trimmed();
+    QString urlStr = m_urlEdit->text().trimmed();
     QRegExp test(QLatin1String("^[a-zA-Z]+\\:.*"));
 
     // Check if it looks like a qualified URL. Try parsing it and see.
@@ -52,26 +52,26 @@ void MainWindow::changeLocation() {
 
     QUrl url;
     url.setEncodedUrl(urlStr.toUtf8(), QUrl::StrictMode);
-    urlEdit->setText(url.toEncoded());
-    view->load(url);
-    view->setFocus(Qt::OtherFocusReason);
+    m_urlEdit->setText(url.toEncoded());
+    m_view->load(url);
+    m_view->setFocus(Qt::OtherFocusReason);
 }
 
 void MainWindow::loadFinished() {
-    urlEdit->setText(view->url().toEncoded());
+    m_urlEdit->setText(m_view->url().toEncoded());
 
     QUrl::FormattingOptions opts;
     opts |= QUrl::RemoveScheme;
     opts |= QUrl::RemoveUserInfo;
     opts |= QUrl::StripTrailingSlash;
-    QString s = view->url().toString(opts);
+    QString s = m_view->url().toString(opts);
     s = s.mid(2);
     if (s.isEmpty())
         return;
 
-    if (!urlList.contains(s))
-        urlList += s;
-    urlModel.setStringList(urlList);
+    if (!m_urlList.contains(s))
+        m_urlList += s;
+    m_urlCompleterModel.setStringList(m_urlList);
 
     if (m_hunterEnabled) {
         /* dump VDOM to the external file */
@@ -112,7 +112,7 @@ void MainWindow::setupUI() {
     createUrlEdit();
     createToolBar();
     createMenus();
-    //hunterConfig->hide();
+    //m_hunterConfig->hide();
 }
 
 void MainWindow::createCentralWidget() {
@@ -120,97 +120,100 @@ void MainWindow::createCentralWidget() {
     createWebView();
 
     QSplitter* splitter = new QSplitter(this);
-    splitter->addWidget(view);
-    splitter->addWidget(sidebar);
+    splitter->addWidget(m_view);
+    splitter->addWidget(m_sidebar);
 
     setCentralWidget(splitter);
 }
 
 void MainWindow::createWebView() {
-    view = new QWebView(this);
-    QWebPage* page = new QWebPage(view);
+    m_view = new QWebView(this);
+    QWebPage* page = new QWebPage(m_view);
     page->settings()->setAttribute(QWebSettings::JavascriptEnabled, m_enableJavascript);
     page->settings()->setAttribute(QWebSettings::PluginsEnabled, m_enablePlugins);
     page->settings()->setAttribute(QWebSettings::AutoLoadImages, m_enableImages);
     page->settings()->setAttribute(QWebSettings::JavaEnabled, m_enableJava);
 
-    view->setPage(page);
+    m_view->setPage(page);
     m_webvdom = new QWebVDom(page->mainFrame());
 
-    connect(view, SIGNAL(loadFinished(bool)),
+    connect(m_view, SIGNAL(loadFinished(bool)),
             this, SLOT(loadFinished()));
-    connect(view, SIGNAL(titleChanged(const QString&)),
+    connect(m_view, SIGNAL(titleChanged(const QString&)),
             this, SLOT(setWindowTitle(const QString&)));
-    connect(view->page(), SIGNAL(linkHovered(const QString&, const QString&, const QString &)),
+    connect(m_view->page(), SIGNAL(linkHovered(const QString&, const QString&, const QString &)),
             this, SLOT(showLinkHover(const QString&, const QString&)));
-    connect(view->page(), SIGNAL(windowCloseRequested()), this, SLOT(deleteLater()));
-    connect(view, SIGNAL(urlChanged(const QUrl&)), this, SLOT(updateUrl(const QUrl&)));
-    connect(view, SIGNAL(linkClicked(const QUrl&)), this, SLOT(loadUrl(const QUrl&)));
+    connect(m_view->page(), SIGNAL(windowCloseRequested()), this, SLOT(deleteLater()));
+    connect(m_view, SIGNAL(urlChanged(const QUrl&)), this, SLOT(updateUrl(const QUrl&)));
+    connect(m_view, SIGNAL(linkClicked(const QUrl&)), this, SLOT(loadUrl(const QUrl&)));
 
-    view->pageAction(QWebPage::Back)->setShortcut(QKeySequence::Back);
-    view->pageAction(QWebPage::Stop)->setShortcut(Qt::Key_Escape);
-    view->pageAction(QWebPage::Forward)->setShortcut(QKeySequence::Forward);
-    view->pageAction(QWebPage::Reload)->setShortcut(Qt::Key_F5);
-    view->pageAction(QWebPage::Undo)->setShortcut(QKeySequence::Undo);
-    view->pageAction(QWebPage::Redo)->setShortcut(QKeySequence::Redo);
-    view->pageAction(QWebPage::Cut)->setShortcut(QKeySequence::Cut);
-    view->pageAction(QWebPage::Copy)->setShortcut(QKeySequence::Copy);
-    view->pageAction(QWebPage::Paste)->setShortcut(QKeySequence::Paste);
-    view->pageAction(QWebPage::ToggleBold)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
-    view->pageAction(QWebPage::ToggleItalic)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
-    view->pageAction(QWebPage::ToggleUnderline)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
+    m_view->pageAction(QWebPage::Back)->setShortcut(QKeySequence::Back);
+    m_view->pageAction(QWebPage::Stop)->setShortcut(Qt::Key_Escape);
+    m_view->pageAction(QWebPage::Forward)->setShortcut(QKeySequence::Forward);
+    m_view->pageAction(QWebPage::Reload)->setShortcut(Qt::Key_F5);
+    m_view->pageAction(QWebPage::Undo)->setShortcut(QKeySequence::Undo);
+    m_view->pageAction(QWebPage::Redo)->setShortcut(QKeySequence::Redo);
+    m_view->pageAction(QWebPage::Cut)->setShortcut(QKeySequence::Cut);
+    m_view->pageAction(QWebPage::Copy)->setShortcut(QKeySequence::Copy);
+    m_view->pageAction(QWebPage::Paste)->setShortcut(QKeySequence::Paste);
+    m_view->pageAction(QWebPage::ToggleBold)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
+    m_view->pageAction(QWebPage::ToggleItalic)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
+    m_view->pageAction(QWebPage::ToggleUnderline)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
 }
 
 void MainWindow::createSideBar() {
-    sidebar = new QWidget(this);
-    QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebar);
-    sidebar->setLayout(sidebarLayout);
+    m_sidebar = new QWidget(this);
+    QVBoxLayout *sidebarLayout = new QVBoxLayout(m_sidebar);
+    m_sidebar->setLayout(sidebarLayout);
 
-    QLabel* label = new QLabel(tr("Active item description"), sidebar);
+    QLabel* label = new QLabel(tr("Active item description"), m_sidebar);
     sidebarLayout->addWidget(label);
-    m_itemInfoEdit = new QTextEdit(sidebar);
+    m_itemInfoEdit = new QTextEdit(m_sidebar);
     m_itemInfoEdit->setReadOnly(true);
     sidebarLayout->addWidget(m_itemInfoEdit);
 
-    label = new QLabel(tr("Page item summary"), sidebar);
+    label = new QLabel(tr("Page item summary"), m_sidebar);
     sidebarLayout->addWidget(label);
-    m_pageInfoEdit = new QTextEdit(sidebar);
+    m_pageInfoEdit = new QTextEdit(m_sidebar);
     m_pageInfoEdit->setReadOnly(true);
     sidebarLayout->addWidget(m_pageInfoEdit);
 }
 
 void MainWindow::createUrlEdit() {
-    urlEdit = new LineEdit(this);
-    urlEdit->setSizePolicy(QSizePolicy::Expanding, urlEdit->sizePolicy().verticalPolicy());
+    m_urlEdit = new LineEdit(this);
+    m_urlEdit->setSizePolicy(QSizePolicy::Expanding,
+            m_urlEdit->sizePolicy().verticalPolicy());
 
-    connect(urlEdit, SIGNAL(returnPressed()),
+    connect(m_urlEdit, SIGNAL(returnPressed()),
             SLOT(changeLocation()));
 
     QCompleter *completer = new QCompleter(this);
-    urlEdit->setCompleter(completer);
-    completer->setModel(&urlModel);
+    m_urlEdit->setCompleter(completer);
+    completer->setModel(&m_urlCompleterModel);
 }
 
 void MainWindow::createProgressBar() {
-    progress = new QProgressBar(this);
-    progress->setRange(0, 100);
-    progress->setMinimumSize(100, 20);
-    progress->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    progress->hide();
-    statusBar()->addPermanentWidget(progress);
+    m_progress = new QProgressBar(this);
+    m_progress->setRange(0, 100);
+    m_progress->setMinimumSize(100, 20);
+    m_progress->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    m_progress->hide();
+    statusBar()->addPermanentWidget(m_progress);
 
-    connect(view, SIGNAL(loadProgress(int)), progress, SLOT(show()));
-    connect(view, SIGNAL(loadProgress(int)), progress, SLOT(setValue(int)));
-    connect(view, SIGNAL(loadFinished(bool)), progress, SLOT(hide()));
+
+
+    connect(m_view, SIGNAL(loadProgress(int)), m_progress, SLOT(show()));
+    connect(m_view, SIGNAL(loadProgress(int)), m_progress, SLOT(setValue(int)));
+    connect(m_view, SIGNAL(loadFinished(bool)), m_progress, SLOT(hide()));
 }
 
 void MainWindow::createToolBar() {
     QToolBar *bar = addToolBar("Navigation");
-    bar->addAction(view->pageAction(QWebPage::Back));
-    bar->addAction(view->pageAction(QWebPage::Forward));
-    bar->addAction(view->pageAction(QWebPage::Reload));
-    bar->addAction(view->pageAction(QWebPage::Stop));
-    bar->addWidget(urlEdit);
+    bar->addAction(m_view->pageAction(QWebPage::Back));
+    bar->addAction(m_view->pageAction(QWebPage::Forward));
+    bar->addAction(m_view->pageAction(QWebPage::Reload));
+    bar->addAction(m_view->pageAction(QWebPage::Stop));
+    bar->addWidget(m_urlEdit);
 }
 
 void MainWindow::createMenus() {
@@ -243,12 +246,12 @@ void MainWindow::createFileMenu() {
 
 void MainWindow::createEditMenu() {
     QMenu *editMenu = menuBar()->addMenu("&Edit");
-    editMenu->addAction(view->pageAction(QWebPage::Undo));
-    editMenu->addAction(view->pageAction(QWebPage::Redo));
+    editMenu->addAction(m_view->pageAction(QWebPage::Undo));
+    editMenu->addAction(m_view->pageAction(QWebPage::Redo));
     editMenu->addSeparator();
-    editMenu->addAction(view->pageAction(QWebPage::Cut));
-    editMenu->addAction(view->pageAction(QWebPage::Copy));
-    editMenu->addAction(view->pageAction(QWebPage::Paste));
+    editMenu->addAction(m_view->pageAction(QWebPage::Cut));
+    editMenu->addAction(m_view->pageAction(QWebPage::Copy));
+    editMenu->addAction(m_view->pageAction(QWebPage::Paste));
     //editMenu->addSeparator();
     //QAction *setEditable = editMenu->addAction(tr("Set Editable"), this, SLOT(setEditable(bool)));
     //setEditable->setCheckable(true);
@@ -256,8 +259,8 @@ void MainWindow::createEditMenu() {
 
 void MainWindow::createViewMenu() {
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
-    viewMenu->addAction(view->pageAction(QWebPage::Stop));
-    viewMenu->addAction(view->pageAction(QWebPage::Reload));
+    viewMenu->addAction(m_view->pageAction(QWebPage::Stop));
+    viewMenu->addAction(m_view->pageAction(QWebPage::Reload));
     viewMenu->addSeparator();
 
     QAction *zoomIn = viewMenu->addAction(tr("Zoom &In"), this, SLOT(zoomIn()));
@@ -312,40 +315,40 @@ void MainWindow::createHelpMenu() {
 }
 
 void MainWindow::writeSettings() {
-    settings->beginGroup("MainWindow");
+    m_settings->beginGroup("MainWindow");
 
-    settings->setValue("size", size());
-    settings->setValue("pos", pos());
+    m_settings->setValue("size", size());
+    m_settings->setValue("pos", pos());
 
-    settings->setValue("enableJavascript", QVariant(m_enableJavascript));
-    settings->setValue("enablePlugins", QVariant(m_enablePlugins));
-    settings->setValue("enableImages", QVariant(m_enableImages));
-    settings->setValue("enableJava", QVariant(m_enableJava));
+    m_settings->setValue("enableJavascript", QVariant(m_enableJavascript));
+    m_settings->setValue("enablePlugins", QVariant(m_enablePlugins));
+    m_settings->setValue("enableImages", QVariant(m_enableImages));
+    m_settings->setValue("enableJava", QVariant(m_enableJava));
 
-    settings->setValue("hunterEnabled", QVariant(m_hunterEnabled));
-    settings->setValue("hunterPath", m_hunterPath);
-    settings->setValue("vdomPath", m_vdomPath);
+    m_settings->setValue("hunterEnabled", QVariant(m_hunterEnabled));
+    m_settings->setValue("hunterPath", m_hunterPath);
+    m_settings->setValue("vdomPath", m_vdomPath);
 
-    settings->endGroup();
+    m_settings->endGroup();
 }
 
 void MainWindow::readSettings() {
-    settings->beginGroup("MainWindow");
+    m_settings->beginGroup("MainWindow");
 
-    resize(settings->value("size", QSize(800, 600)).toSize());
-    move(settings->value("pos", QPoint(200, 200)).toPoint());
+    resize(m_settings->value("size", QSize(800, 600)).toSize());
+    move(m_settings->value("pos", QPoint(200, 200)).toPoint());
 
-    m_enableJavascript = settings->value("enableJavascript").toBool();
-    m_enablePlugins = settings->value("enablePlugins").toBool();
-    m_enableImages = settings->value("enableImages").toBool();
-    m_enableJava = settings->value("enableJava").toBool();
+    m_enableJavascript = m_settings->value("enableJavascript").toBool();
+    m_enablePlugins = m_settings->value("enablePlugins").toBool();
+    m_enableImages = m_settings->value("enableImages").toBool();
+    m_enableJava = m_settings->value("enableJava").toBool();
 
-    m_hunterEnabled = settings->value("hunterEnabled").toBool();
-    m_hunterPath = settings->value("hunterPath").toString();
-    m_vdomPath   = settings->value("vdomPath").toString();
+    m_hunterEnabled = m_settings->value("hunterEnabled").toBool();
+    m_hunterPath = m_settings->value("hunterPath").toString();
+    m_vdomPath   = m_settings->value("vdomPath").toString();
     initHunterConfig();
 
-    settings->endGroup();
+    m_settings->endGroup();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -354,10 +357,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::saveHunterConfig() {
-    m_hunterEnabled = hunterConfig->hunterEnabled();
-    //m_hunterPath = hunterConfig->progPath();
-    m_hunterPath = hunterConfig->progPath();
-    m_vdomPath   = hunterConfig->vdomPath();
+    m_hunterEnabled = m_hunterConfig->hunterEnabled();
+    //m_hunterPath = m_hunterConfig->progPath();
+    m_hunterPath = m_hunterConfig->progPath();
+    m_vdomPath   = m_hunterConfig->vdomPath();
     //qDebug() << "Saving hunter config... (hunter: " << m_hunterPath << ")";
 }
 
@@ -378,6 +381,7 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
                 .arg(m_hunterPath).arg(exitCode));
 
     /* Process the .res output file by hunter programs */
+
     QString resFile = m_vdomPath + ".res";
     if (!QFile::exists(resFile)) {
         QMessageBox::warning(this, tr("Hunter Result File Checker"),
@@ -424,5 +428,11 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
             QMessageBox::NoButton);
         return;
     }
+    const QVariantMap root = res.toMap();
+    annotateWebPage(root);
+}
+
+void MainWindow::annotateWebPage(const QVariant& map) {
+
 }
 

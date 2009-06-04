@@ -20,11 +20,11 @@ public:
     MainWindow(const QString& url = QString());
 
     QWebPage* webPage() const {
-        return view->page();
+        return m_view->page();
     }
 
     QWebView* webView() const {
-        return view;
+        return m_view;
     }
 
 protected:
@@ -49,12 +49,12 @@ protected slots:
 
     void loadUrl(const QUrl& url) {
         //fprintf(stderr, "Loading new url...");
-        view->load(url);
-        view->setFocus(Qt::OtherFocusReason);
+        m_view->load(url);
+        m_view->setFocus(Qt::OtherFocusReason);
     }
 
     void updateUrl(const QUrl& url) {
-        urlEdit->setText(url.toEncoded());
+        m_urlEdit->setText(url.toEncoded());
     }
 
     void setWindowTitle(const QString& title) {
@@ -68,8 +68,8 @@ protected slots:
 
     void selectLineEdit() {
         //fprintf(stderr, "selecting url edit...\n");
-        urlEdit->selectAll();
-        urlEdit->setFocus();
+        m_urlEdit->selectAll();
+        m_urlEdit->setFocus();
     }
 
     void changeLocation();
@@ -95,7 +95,7 @@ protected slots:
         if (i < zoomLevels.count() - 1)
             currentZoom = zoomLevels[i + 1];
 
-        view->setZoomFactor(qreal(currentZoom)/100.0);
+        m_view->setZoomFactor(qreal(currentZoom)/100.0);
     }
 
     void zoomOut() {
@@ -104,25 +104,25 @@ protected slots:
         if (i > 0)
             currentZoom = zoomLevels[i - 1];
 
-        view->setZoomFactor(qreal(currentZoom)/100.0);
+        m_view->setZoomFactor(qreal(currentZoom)/100.0);
     }
 
     void resetZoom()
     {
        currentZoom = 100;
-       view->setZoomFactor(1.0);
+       m_view->setZoomFactor(1.0);
     }
 
     void toggleZoomTextOnly(bool b)
     {
-        view->page()->settings()->setAttribute(QWebSettings::ZoomTextOnly, b);
+        m_view->page()->settings()->setAttribute(QWebSettings::ZoomTextOnly, b);
     }
 
     void print() {
 #if QT_VERSION >= 0x040400 && !defined(QT_NO_PRINTER)
         QPrintPreviewDialog dlg(this);
         connect(&dlg, SIGNAL(paintRequested(QPrinter *)),
-                view, SLOT(print(QPrinter *)));
+                m_view, SLOT(print(QPrinter *)));
         dlg.exec();
 #endif
     }
@@ -134,37 +134,37 @@ protected slots:
 
     void toggleEnableJavascript(bool enabled) {
         m_enableJavascript = enabled;
-        view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, enabled);
+        m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, enabled);
     }
 
     void toggleEnableJava(bool enabled) {
         m_enableJava = enabled;
-        view->page()->settings()->setAttribute(QWebSettings::JavaEnabled, enabled);
+        m_view->page()->settings()->setAttribute(QWebSettings::JavaEnabled, enabled);
     }
 
     void toggleEnableImages(bool enabled) {
         m_enableImages = enabled;
-        view->page()->settings()->setAttribute(QWebSettings::AutoLoadImages, enabled);
+        m_view->page()->settings()->setAttribute(QWebSettings::AutoLoadImages, enabled);
     }
 
     void toggleEnablePlugins(bool enabled) {
         m_enablePlugins = enabled;
-        view->page()->settings()->setAttribute(QWebSettings::PluginsEnabled, enabled);
+        m_view->page()->settings()->setAttribute(QWebSettings::PluginsEnabled, enabled);
     }
 
     void saveHunterConfig();
 
     void execHunterConfig() {
         initHunterConfig();
-        hunterConfig->exec();
+        m_hunterConfig->exec();
     }
 
 private:
 
     void initHunterConfig() {
-        hunterConfig->setHunterEnabled(m_hunterEnabled);
-        hunterConfig->setProgPath(m_hunterPath);
-        hunterConfig->setVdomPath(m_vdomPath);
+        m_hunterConfig->setHunterEnabled(m_hunterEnabled);
+        m_hunterConfig->setProgPath(m_hunterPath);
+        m_hunterConfig->setVdomPath(m_vdomPath);
     }
 
     QVector<int> zoomLevels;
@@ -191,18 +191,20 @@ private:
     void writeSettings();
     void readSettings();
 
+    void annotateWebPage(const QVariant& map);
+
     QTextEdit* m_itemInfoEdit;
     QTextEdit* m_pageInfoEdit;
 
-    QWebView *view;
-    LineEdit *urlEdit;
-    QWidget *sidebar;
-    QProgressBar *progress;
-    HunterConfigDialog* hunterConfig;
+    QWebView *m_view;
+    LineEdit *m_urlEdit;
+    QWidget *m_sidebar;
+    QProgressBar *m_progress;
+    HunterConfigDialog* m_hunterConfig;
 
-    QStringList urlList;
-    QStringListModel urlModel;
-    QSettings* settings;
+    QStringList m_urlList;
+    QStringListModel m_urlCompleterModel;
+    QSettings* m_settings;
 
     bool m_enableJavascript;
     bool m_enablePlugins;
