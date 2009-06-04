@@ -402,7 +402,7 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
             QString("Result file %1: %2")
                 .arg(m_vdomPath).arg(file.errorString()),
                 QMessageBox::NoButton);
-
+        return;
     }
 
     bool status = true;
@@ -416,6 +416,13 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
             QMessageBox::NoButton);
         return;
     }
-    qDebug() << res << endl;
+    //qDebug() << res << endl;
+    if (!res.canConvert<QVariantMap>()) {
+        QMessageBox::warning(this, tr("Hunter Result File Loader"),
+            QString("Result file %1 does not contain a JSON object.")
+                .arg(resFile),
+            QMessageBox::NoButton);
+        return;
+    }
 }
 
