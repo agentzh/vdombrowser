@@ -5,6 +5,8 @@
 #include "aboutdialog.h"
 #include "hunterconfigdialog.h"
 
+/* from QJson: http://qjson.sourceforge.net/docs/index.html */
+#include <qjson/json_driver.hh>
 #include <qwebvdom.h> /* added to WebCore by Yahoo! China EEEE */
 #include <qwebview.h>
 #include <qwebframe.h>
@@ -35,24 +37,14 @@ protected slots:
         statusBar()->showMessage("Hunter " + m_hunterPath + " started.");
     }
 
-    void hunterFinished(int exitCode, QProcess::ExitStatus) {
-        if (exitCode != 0) {
-            m_pageInfoEdit->append("Failed to spawn X Hunter " +
-                m_hunterPath + ": " + m_hunter.errorString() +
-                ": Process returns exit code " + m_hunter.exitCode());
-            return;
-        }
-        statusBar()->showMessage(
-            QString("Finished running X Hunter %1. (exit code: %2)")
-                    .arg(m_hunterPath).arg(exitCode));
-    }
+    void hunterFinished(int exitCode, QProcess::ExitStatus);
 
     void emitHunterStdout() {
-        m_pageInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardOutput()));
+        m_itemInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardOutput()));
     }
 
     void emitHunterStderr() {
-        m_pageInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardError()));
+        m_itemInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardError()));
     }
 
     void loadUrl(const QUrl& url) {
@@ -223,6 +215,8 @@ private:
 
     QWebVDom* m_webvdom;
     QProcess m_hunter;
+
+    JSonDriver m_jsonDriver;
 };
 
 #endif

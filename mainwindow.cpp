@@ -99,6 +99,7 @@ void MainWindow::loadFinished() {
         m_hunter.close();
         QStringList args;
         args << m_vdomPath;
+        m_itemInfoEdit->clear();
         m_pageInfoEdit->clear();
         statusBar()->showMessage("Starting " + m_hunterPath + "...");
         m_hunter.start(m_hunterPath, args);
@@ -359,3 +360,62 @@ void MainWindow::saveHunterConfig() {
     m_vdomPath   = hunterConfig->vdomPath();
     //qDebug() << "Saving hunter config... (hunter: " << m_hunterPath << ")";
 }
+
+void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
+    if (exitCode != 0) {
+        QString msg = QString("Failed to spawn X Hunter %1: %2: "
+                "Process returns exit code %3.")
+                .arg(m_hunterPath)
+                .arg(m_hunter.errorString())
+                .arg(m_hunter.exitCode());
+        m_itemInfoEdit->append(msg);
+        QMessageBox::warning(this, tr("Hunter runner"),
+                msg, QMessageBox::NoButton);
+        return;
+    }
+    statusBar()->showMessage(
+        QString("Finished running X Hunter %1. (exit code: %2)")
+                .arg(m_hunterPath).arg(exitCode));
+
+    /* Process the .res output file by hunter programs */
+    QString resFile = m_vdomPath + ".res";
+    if (!QFile::exists(resFile)) {
+        QMessageBox::warning(this, tr("Hunter Result File Checker"),
+            QString("Hunter result data file \"%1\"not found."),
+            QMessageBox::NoButton);
+        return;
+    }
+
+    QFile file(resFile);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("Hunter Result File Loader"),
+            QString("Failed to load hunter result file %1: %2")
+                .arg(resFile).arg(file.errorString()),
+                QMessageBox::NoButton);
+        file.close();
+        return;
+    }
+    QString json = QString::fromUtf8(file.readAll());
+    file.close();
+    if (json.isEmpty()) {
+        QMessageBox::warning(this, tr("Hunter Result File Loader"),
+            QString("Result file %1: %2")
+                .arg(m_vdomPath).arg(file.errorString()),
+                QMessageBox::NoButton);
+
+    }
+
+    bool status = true;
+    QVariant res = m_jsonDriver.parse(json, &status);
+    if (status) {
+        QMessageBox::warning(this, tr("Hunter Result File Loader"),
+            QString("Failed to parse JSON in file %1: line %2: %3")
+                .arg(resFile)
+                .arg(m_jsonDriver.errorLine())
+                .arg(m_jsonDriver.error()),
+            QMessageBox::NoButton);
+        return;
+    }
+    qDebug() << res << endl;
+}
+
