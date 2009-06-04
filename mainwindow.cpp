@@ -442,6 +442,20 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
         m_hunterLabel->setText(tr("Unknown hunter"));
     }
     m_hunterLabel->show();
+
+    QVariant jumpTo = root["jump_to"];
+    if (!jumpTo.isNull() && jumpTo.canConvert<QVariantMap>()) {
+        QVariantMap point = jumpTo.toMap();
+        QVariant x = point["x"];
+        QVariant y = point["y"];
+        if (!x.isNull() && x.canConvert<int>() &&
+                !y.isNull() && y.canConvert<int>()) {
+            QWebFrame* frame = m_view->page()->mainFrame();
+            //qDebug() << "Scroll the page to point (" << x.toInt() <<
+                //"," << y.toInt() << ")" << endl;
+            frame->scroll(x.toInt(), y.toInt());
+        }
+    }
 }
 
 void MainWindow::annotateWebPage(const QVariant& map) {
