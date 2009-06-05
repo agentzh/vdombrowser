@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "webpage.h"
 #include <stdlib.h>
+#include <qwebvdom_p.h> /* added to WebCore by Yahoo! China EEEE */
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
@@ -57,6 +58,10 @@ void MainWindow::changeLocation() {
     QUrl url;
     url.setEncodedUrl(urlStr.toUtf8(), QUrl::StrictMode);
     m_urlEdit->setText(url.toEncoded());
+    // we might have enabled JS for UI interaction...
+    if (!m_enableJavascript) {
+        m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
+    }
     m_view->load(url);
     m_view->setFocus(Qt::OtherFocusReason);
 }
@@ -497,8 +502,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
         if (groupVar.canConvert<QVariantList>()) {
             QVariantList group = groupVar.toList();
             QVariantList::iterator itJ;
-            int j = 0;
-            for (itJ = group.begin(); itJ != group.end(); j++, itJ++) {
+            for (itJ = group.begin(); itJ != group.end(); itJ++) {
                 QVariant itemVar = *itJ;
                 if (itemVar.canConvert<QVariantMap>()) {
                     QVariantMap item = itemVar.toMap();
@@ -524,8 +528,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
             "style.width  = '%6px';"
             "style.height = '%7px';"
             "box.className = 'vdom-result vdom-group-%8';"
-            "document.body.appendChild(box); true"
-)
+            "document.body.appendChild(box);")
                         .arg(item["borderWidth"].toString())
                         .arg(item["borderColor"].toString())
                         .arg(item["borderStyle"].toString())
@@ -534,25 +537,26 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                         .arg(item["w"].toInt())
                         .arg(item["h"].toInt())
                         .arg(i);
-                    /*
                     QVariant noHighlight = item["noHighlight"];
-                    if (noHighlight.isNull() &&
-                            noHightlight.canConvert<bool>() &&
-                            noHightlight.toBool()) {
-                        js += QString(
-                    "_VdomBrowser.plantHooks(document, box, item, %1);"
-                        ).arg(j);
-                        */
-                    //qDebug() << i << ":" << j << ": " << js << endl;
-                    QVariant res = evalJS(js);
+                    if (noHighlight.isNull() ||
+                            (noHighlight.canConvert<bool>() &&
+                            !noHighlight.toBool())) {
+                        js += QString::fromUtf8("box.addEventListener('mouseover',"
+                            "function(e){itemInfoEdit.plainText='%1'},"
+                            "true);").arg(m_webvdom->dumpStrAsJSON);
+                        qDebug() << js << endl;
+                    }
+                    // qDebug() << i << ":" << j << ": " << js << endl;
+                    QVariant res = evalJS(js + "true");
                     //if (!res.isNull()) {
-                        //qDebug() << "res: " << res << endl;
+                    qDebug() << "res: " << res << endl;
                     //}
                 }
             }
         }
     }
     m_view->update();
+    m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
 }
 
 void MainWindow::huntOnly() {
