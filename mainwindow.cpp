@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "webpage.h"
 #include <stdlib.h>
-#include <qwebvdom_p.h> /* added to WebCore by Yahoo! China EEEE */
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
@@ -541,15 +540,30 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                     if (noHighlight.isNull() ||
                             (noHighlight.canConvert<bool>() &&
                             !noHighlight.toBool())) {
-                        js += QString::fromUtf8("box.addEventListener('mouseover',"
-                            "function(e){itemInfoEdit.plainText='%1'},"
-                            "true);").arg(m_webvdom->dumpStrAsJSON);
-                        qDebug() << js << endl;
+                        QVariant descVar = item["desc"];
+                        if (descVar.isNull() || !descVar.canConvert<QString>()) {
+                            descVar = QVariant("");
+                        }
+                        QVariant titleVar = item["title"];
+                        if (titleVar.isNull() || !titleVar.canConvert<QString>()) {
+                            titleVar = QVariant("");
+                        }
+                        js += QString("box.addEventListener('mouseover',"
+                            "function (e) {"
+                              "itemInfoEdit.plainText = %1;"
+                              "statusBar.showMessage(%2);"
+                            "},"
+                            "true);")
+                                .arg(m_webvdom->dumpStrAsJson(
+                                        descVar.toString()))
+                                .arg(m_webvdom->dumpStrAsJson(
+                                        titleVar.toString()));
+                        //qDebug() << js << endl;
                     }
                     // qDebug() << i << ":" << j << ": " << js << endl;
                     QVariant res = evalJS(js + "true");
                     //if (!res.isNull()) {
-                    qDebug() << "res: " << res << endl;
+                    //qDebug() << "res: " << res << endl;
                     //}
                 }
             }
