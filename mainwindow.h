@@ -76,7 +76,7 @@ protected slots:
 
     void changeLocation();
 
-    void loadFinished();
+    void loadFinished(bool done);
 
     void showLinkHover(const QString &link, const QString &toolTip) {
         statusBar()->showMessage(link);

@@ -32,8 +32,8 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QUrl qurl;
     qurl.setEncodedUrl(url.toUtf8(), QUrl::StrictMode);
     if (qurl.isValid()) {
-        m_urlEdit->setText(qurl.toString());
-        m_view->load(qurl);
+        m_urlEdit->setText(qurl.toEncoded());
+        m_view->page()->mainFrame()->load(qurl);
 
         // the zoom values are chosen to be like in Mozilla Firefox 3
         zoomLevels << 30 << 50 << 67 << 80 << 90;
@@ -61,11 +61,19 @@ void MainWindow::changeLocation() {
     if (!m_enableJavascript) {
         m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
     }
-    m_view->load(url);
+    qDebug() << "Loading URL " << url.toEncoded() << "..." << endl;
+    m_view->page()->mainFrame()->load(url);
     m_view->setFocus(Qt::OtherFocusReason);
 }
 
-void MainWindow::loadFinished() {
+void MainWindow::loadFinished(bool done) {
+    if (!done) {
+        QMessageBox::warning(this, tr("Browser Loader"),
+            QString("Failed to open resource %1.").arg(m_urlEdit->text()),
+            QMessageBox::NoButton);
+        return;
+    }
+    qDebug() << "Loaded URL " << m_view->url().toEncoded() << "." << endl;
     m_urlEdit->setText(m_view->url().toEncoded());
     addUrlToList();
 
@@ -134,8 +142,8 @@ void MainWindow::createWebView() {
     m_view->setPage(page);
     m_webvdom = new QWebVDom(page->mainFrame());
 
-    connect(m_view, SIGNAL(loadFinished(bool)),
-            this, SLOT(loadFinished()));
+    connect(m_view->page(), SIGNAL(loadFinished(bool)),
+            this, SLOT(loadFinished(bool)));
     connect(m_view, SIGNAL(titleChanged(const QString&)),
             this, SLOT(setWindowTitle(const QString&)));
     connect(m_view->page(), SIGNAL(linkHovered(const QString&, const QString&, const QString &)),
@@ -605,7 +613,7 @@ void MainWindow::huntOnly() {
     //qDebug() <<  << endl;
     //m_view->update();
     //QMessageBox::warning(this, "hi", "Done!", QMessageBox::NoButton);
-    loadFinished();
+    loadFinished(true);
 }
 
 void MainWindow::initHunterConfig() {
