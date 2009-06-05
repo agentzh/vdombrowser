@@ -163,6 +163,8 @@ protected slots:
 
 private:
 
+    QVariant evalJS(const QString& js);
+
     void addUrlToList();
     void initHunterConfig();
 
@@ -190,7 +192,7 @@ private:
     void writeSettings();
     void readSettings();
 
-    void annotateWebPage(const QVariantList& groups);
+    void annotateWebPage(QVariantList& groups);
 
     QTextEdit* m_itemInfoEdit;
     QTextEdit* m_pageInfoEdit;

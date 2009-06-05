@@ -442,8 +442,16 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     if (!groupsVar.isNull() && groupsVar.canConvert<QVariantList>()) {
         QVariantList groups = groupsVar.toList();
         if ( ! groups.isEmpty() ) {
+            if (!m_enableJavascript) {
+                m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+            }
             frame->addToJavaScriptWindowObject("itemInfoEdit", m_itemInfoEdit);
             frame->addToJavaScriptWindowObject("statusBar", statusBar());
+
+            if (!m_enableJavascript) {
+                m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
+            }
+            //evalJS("window.resData=" + json + ";return true");
             annotateWebPage(groups);
         }
     }
@@ -477,8 +485,74 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     }
 }
 
-void MainWindow::annotateWebPage(const QVariantList& groups) {
-    Q_UNUSED(groups)
+inline QVariant MainWindow::evalJS(const QString& js) {
+    return m_view->page()->mainFrame()->evaluateJavaScript(js);
+}
+
+void MainWindow::annotateWebPage(QVariantList& groups) {
+    QVariantList::iterator itI;
+    int i = 0;
+    for (itI = groups.begin(); itI != groups.end(); i++, itI++) {
+        QVariant groupVar = *itI;
+        if (groupVar.canConvert<QVariantList>()) {
+            QVariantList group = groupVar.toList();
+            QVariantList::iterator itJ;
+            int j = 0;
+            for (itJ = group.begin(); itJ != group.end(); j++, itJ++) {
+                QVariant itemVar = *itJ;
+                if (itemVar.canConvert<QVariantMap>()) {
+                    QVariantMap item = itemVar.toMap();
+                    //qDebug() << item << endl;
+                    if (item["borderWidth"].isNull()) {
+                        item["borderWidth"] = QVariant(2);
+                    }
+                    if (item["borderColor"].isNull()) {
+                        item["borderColor"] = QVariant("red");
+                    }
+                    if (item["borderStyle"].isNull()) {
+                        item["borderStyle"] = QVariant("solid");
+                    }
+                    QString js = QString(
+            "var box = document.createElement('div');"
+            "var style = box.style;"
+            "style.borderWidth = '%1px';"
+            "style.borderColor = '%2';"
+            "style.borderStyle = '%3';"
+            "style.position = 'absolute';"
+            "style.left   = '%4px';"
+            "style.top    = '%5px';"
+            "style.width  = '%6px';"
+            "style.height = '%7px';"
+            "box.className = 'vdom-result vdom-group-%8';"
+            "document.body.appendChild(box);return true;"
+)
+                        .arg(item["borderWidth"].toString())
+                        .arg(item["borderColor"].toString())
+                        .arg(item["borderStyle"].toString())
+                        .arg(item["x"].toInt())
+                        .arg(item["y"].toInt())
+                        .arg(item["w"].toInt())
+                        .arg(item["h"].toInt())
+                        .arg(i);
+                    /*
+                    QVariant noHighlight = item["noHighlight"];
+                    if (noHighlight.isNull() &&
+                            noHightlight.canConvert<bool>() &&
+                            noHightlight.toBool()) {
+                        js += QString(
+                    "_VdomBrowser.plantHooks(document, box, item, %1);"
+                        ).arg(j);
+                        */
+                    //qDebug() << i << ":" << j << ": " << js << endl;
+                    QVariant res = evalJS(js);
+                    if (!res.isNull()) {
+                        //qDebug() << "res: " << res << endl;
+                    }
+                }
+            }
+        }
+    }
+    m_view->update();
 }
 
 void MainWindow::huntOnly() {
@@ -488,6 +562,14 @@ void MainWindow::huntOnly() {
             QMessageBox::NoButton);
         return;
     }
+    QString js = "var nodes = document.getElementsByClassName('vdom-result');"
+        "for (var i = 0; i < nodes.length; i++) {"
+          "nodes[i].style.display = 'none';"
+        "} true";
+    qDebug() << js << endl;
+    qDebug() << evalJS(js) << endl;
+    //m_view->update();
+    //QMessageBox::warning(this, "hi", "Done!", QMessageBox::NoButton);
     loadFinished();
 }
 

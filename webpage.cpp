@@ -18,3 +18,8 @@ QObject *WebPage::createPlugin(const QString &classId, const QUrl &url, const QS
     return loader.createWidget(classId, view());
 }
 
+void WebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID ) {
+    qDebug() << "[Error Console] " << sourceID << ": line " << lineNumber <<
+        ": " << message << endl;
+}
+
