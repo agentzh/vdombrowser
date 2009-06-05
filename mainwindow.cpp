@@ -566,8 +566,9 @@ void MainWindow::huntOnly() {
         "for (var i = 0; i < nodes.length; i++) {"
           "nodes[i].style.display = 'none';"
         "} true";
-    qDebug() << js << endl;
-    qDebug() << evalJS(js) << endl;
+    //qDebug() << js << endl;
+    evalJS(js);
+    //qDebug() <<  << endl;
     //m_view->update();
     //QMessageBox::warning(this, "hi", "Done!", QMessageBox::NoButton);
     loadFinished();
