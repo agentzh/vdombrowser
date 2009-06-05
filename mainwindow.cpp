@@ -524,7 +524,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
             "style.width  = '%6px';"
             "style.height = '%7px';"
             "box.className = 'vdom-result vdom-group-%8';"
-            "document.body.appendChild(box);return true;"
+            "document.body.appendChild(box); true"
 )
                         .arg(item["borderWidth"].toString())
                         .arg(item["borderColor"].toString())
@@ -545,9 +545,9 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                         */
                     //qDebug() << i << ":" << j << ": " << js << endl;
                     QVariant res = evalJS(js);
-                    if (!res.isNull()) {
+                    //if (!res.isNull()) {
                         //qDebug() << "res: " << res << endl;
-                    }
+                    //}
                 }
             }
         }
