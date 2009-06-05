@@ -552,12 +552,28 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                             "function (e) {"
                               "itemInfoEdit.plainText = %1;"
                               "statusBar.showMessage(%2);"
+                              "nodes = document.getElementsByClassName('vdom-group-%3');"
+                              "for (var i = 0; i < nodes.length; i++) {"
+                                "var node = nodes[i];"
+                                "node.setAttribute('_vdom_color', node.style.borderColor);"
+                                "node.style.borderColor = 'yellow';"
+                              "}"
                             "},"
                             "true);")
                                 .arg(m_webvdom->dumpStrAsJson(
                                         descVar.toString()))
                                 .arg(m_webvdom->dumpStrAsJson(
-                                        titleVar.toString()));
+                                        titleVar.toString()))
+                                .arg(i);
+                        js += QString("box.addEventListener('mouseout',"
+                            "function (e) {"
+                              "nodes = document.getElementsByClassName('vdom-group-%1');"
+                              "for (var i = 0; i < nodes.length; i++) {"
+                                "var node = nodes[i];"
+                                "node.style.borderColor = node.getAttribute('_vdom_color');"
+                              "}"
+                            "},"
+                            "true);").arg(i);
                         //qDebug() << js << endl;
                     }
                     // qDebug() << i << ":" << j << ": " << js << endl;
