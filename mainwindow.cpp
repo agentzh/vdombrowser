@@ -457,6 +457,13 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
             frame->scroll(x.toInt(), y.toInt());
         }
     }
+
+    QVariant summary = root["summary"];
+    m_pageInfoEdit->clear();
+    if (!summary.isNull() && summary.canConvert<QString>()) {
+        QString txt = summary.toString();
+        m_pageInfoEdit->setText(txt);
+    }
 }
 
 void MainWindow::annotateWebPage(const QVariant& map) {
