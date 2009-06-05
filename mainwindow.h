@@ -27,9 +27,6 @@ public:
         return m_view;
     }
 
-    QTextEdit* itemInfoEdit() { return m_itemInfoEdit; }
-    QTextEdit* pageInfoEdit() { return m_pageInfoEdit; }
-
 protected:
 
     virtual void closeEvent(QCloseEvent * event);
@@ -193,7 +190,7 @@ private:
     void writeSettings();
     void readSettings();
 
-    void annotateWebPage(const QVariant& map);
+    void annotateWebPage(const QVariantList& groups);
 
     QTextEdit* m_itemInfoEdit;
     QTextEdit* m_pageInfoEdit;

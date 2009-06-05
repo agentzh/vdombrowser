@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "jsappbridge.h"
 #include "webpage.h"
 #include <stdlib.h>
 
@@ -435,8 +434,19 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
             QMessageBox::NoButton);
         return;
     }
+
     const QVariantMap root = res.toMap();
-    annotateWebPage(root);
+    QWebFrame* frame = m_view->page()->mainFrame();
+
+    QVariant groupsVar = root["groups"];
+    if (!groupsVar.isNull() && groupsVar.canConvert<QVariantList>()) {
+        QVariantList groups = groupsVar.toList();
+        if ( ! groups.isEmpty() ) {
+            frame->addToJavaScriptWindowObject("itemInfoEdit", m_itemInfoEdit);
+            frame->addToJavaScriptWindowObject("statusBar", statusBar());
+            annotateWebPage(groups);
+        }
+    }
 
     QVariant programMeta = root["program"];
     if (!programMeta.isNull() && programMeta.canConvert<QString>()) {
@@ -445,8 +455,6 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
         m_hunterLabel->setText(tr("Unknown hunter"));
     }
     m_hunterLabel->show();
-
-    QWebFrame* frame = m_view->page()->mainFrame();
 
     QVariant jumpTo = root["jump_to"];
     if (!jumpTo.isNull() && jumpTo.canConvert<QVariantMap>()) {
@@ -467,14 +475,10 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
         QString txt = summary.toString();
         m_pageInfoEdit->setText(txt);
     }
-
-    JSAppBridge bridge(this);
-    QString bridgeName = QString("VdomBridge_%1").arg(rand() % 999999 + 1);
-    frame->addToJavaScriptWindowObject(bridgeName, &bridge);
 }
 
-void MainWindow::annotateWebPage(const QVariant& map) {
-    Q_UNUSED(map)
+void MainWindow::annotateWebPage(const QVariantList& groups) {
+    Q_UNUSED(groups)
 }
 
 void MainWindow::huntOnly() {
