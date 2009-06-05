@@ -15,6 +15,9 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
             this, SLOT(hunterFinished(int, QProcess::ExitStatus)));
     connect(&m_hunter, SIGNAL(started()), this, SLOT(hunterStarted()));
 
+    m_huntButton = new QPushButton(tr("Hun&t"), this);
+    connect(m_huntButton, SIGNAL(clicked()), SLOT(huntOnly()));
+
     m_settings = new QSettings(
         QSettings::UserScope,
         qApp->organizationDomain(),
@@ -59,19 +62,7 @@ void MainWindow::changeLocation() {
 
 void MainWindow::loadFinished() {
     m_urlEdit->setText(m_view->url().toEncoded());
-
-    QUrl::FormattingOptions opts;
-    opts |= QUrl::RemoveScheme;
-    opts |= QUrl::RemoveUserInfo;
-    opts |= QUrl::StripTrailingSlash;
-    QString s = m_view->url().toString(opts);
-    s = s.mid(2);
-    if (s.isEmpty())
-        return;
-
-    if (!m_urlList.contains(s))
-        m_urlList += s;
-    m_urlCompleterModel.setStringList(m_urlList);
+    addUrlToList();
 
     if (m_hunterEnabled) {
         /* dump VDOM to the external file */
@@ -218,6 +209,12 @@ void MainWindow::createToolBar() {
     bar->addAction(m_view->pageAction(QWebPage::Reload));
     bar->addAction(m_view->pageAction(QWebPage::Stop));
     bar->addWidget(m_urlEdit);
+
+    QPushButton* loadButton = new QPushButton(tr("&Load"), this);
+    connect(loadButton, SIGNAL(clicked()), SLOT(changeLocation()));
+    bar->addWidget(loadButton);
+
+    bar->addWidget(m_huntButton);
 }
 
 void MainWindow::createMenus() {
@@ -348,6 +345,8 @@ void MainWindow::readSettings() {
     m_enableJava = m_settings->value("enableJava").toBool();
 
     m_hunterEnabled = m_settings->value("hunterEnabled").toBool();
+    m_huntButton->setEnabled(m_hunterEnabled);
+
     m_hunterPath = m_settings->value("hunterPath").toString();
     m_vdomPath   = m_settings->value("vdomPath").toString();
     initHunterConfig();
@@ -362,6 +361,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::saveHunterConfig() {
     m_hunterEnabled = m_hunterConfig->hunterEnabled();
+    m_huntButton->setEnabled(m_hunterEnabled);
+
     //m_hunterPath = m_hunterConfig->progPath();
     m_hunterPath = m_hunterConfig->progPath();
     m_vdomPath   = m_hunterConfig->vdomPath();
@@ -460,5 +461,35 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
 
 void MainWindow::annotateWebPage(const QVariant& map) {
     Q_UNUSED(map)
+}
+
+void MainWindow::huntOnly() {
+    if (!m_hunterEnabled) {
+        QMessageBox::warning(this, tr("Hunt Only"),
+            QString("X Hunter is not enabled in the preferences."),
+            QMessageBox::NoButton);
+        return;
+    }
+    loadFinished();
+}
+
+void MainWindow::initHunterConfig() {
+    m_hunterConfig->setHunterEnabled(m_hunterEnabled);
+    m_hunterConfig->setProgPath(m_hunterPath);
+    m_hunterConfig->setVdomPath(m_vdomPath);
+}
+
+void MainWindow::addUrlToList() {
+    QUrl::FormattingOptions opts;
+    opts |= QUrl::RemoveScheme;
+    opts |= QUrl::RemoveUserInfo;
+    opts |= QUrl::StripTrailingSlash;
+    QString s = m_view->url().toString(opts);
+    s = s.mid(2);
+    if (!s.isEmpty()) {
+        if (!m_urlList.contains(s))
+            m_urlList += s;
+        m_urlCompleterModel.setStringList(m_urlList);
+    }
 }
 

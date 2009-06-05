@@ -33,6 +33,8 @@ protected:
 
 protected slots:
 
+    void huntOnly();
+
     void hunterStarted() {
         statusBar()->showMessage("Hunter " + m_hunterPath + " started.");
     }
@@ -161,11 +163,8 @@ protected slots:
 
 private:
 
-    void initHunterConfig() {
-        m_hunterConfig->setHunterEnabled(m_hunterEnabled);
-        m_hunterConfig->setProgPath(m_hunterPath);
-        m_hunterConfig->setVdomPath(m_vdomPath);
-    }
+    void addUrlToList();
+    void initHunterConfig();
 
     QVector<int> zoomLevels;
     int currentZoom;
@@ -218,6 +217,7 @@ private:
 
     QWebVDom* m_webvdom;
     QProcess m_hunter;
+    QPushButton* m_huntButton;
 
     JSonDriver m_jsonDriver;
 };
