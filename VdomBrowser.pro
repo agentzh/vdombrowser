@@ -6,7 +6,8 @@ SOURCES += aboutdialog.cpp \
            mainwindow.cpp \
            webpage.cpp \
            main.cpp
-HEADERS += aboutdialog.h \
+HEADERS += jsappbridge.h \
+           aboutdialog.h \
            hunterconfigdialog.h \
            version.h \
            lineedit.h \

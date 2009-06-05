@@ -27,6 +27,9 @@ public:
         return m_view;
     }
 
+    QTextEdit* itemInfoEdit() { return m_itemInfoEdit; }
+    QTextEdit* pageInfoEdit() { return m_pageInfoEdit; }
+
 protected:
 
     virtual void closeEvent(QCloseEvent * event);

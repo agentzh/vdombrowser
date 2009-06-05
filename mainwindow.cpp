@@ -1,5 +1,7 @@
 #include "mainwindow.h"
+#include "jsappbridge.h"
 #include "webpage.h"
+#include <stdlib.h>
 
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
@@ -444,6 +446,8 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     }
     m_hunterLabel->show();
 
+    QWebFrame* frame = m_view->page()->mainFrame();
+
     QVariant jumpTo = root["jump_to"];
     if (!jumpTo.isNull() && jumpTo.canConvert<QVariantMap>()) {
         QVariantMap point = jumpTo.toMap();
@@ -451,7 +455,6 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
         QVariant y = point["y"];
         if (!x.isNull() && x.canConvert<int>() &&
                 !y.isNull() && y.canConvert<int>()) {
-            QWebFrame* frame = m_view->page()->mainFrame();
             //qDebug() << "Scroll the page to point (" << x.toInt() <<
                 //"," << y.toInt() << ")" << endl;
             frame->scroll(x.toInt(), y.toInt());
@@ -464,6 +467,10 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
         QString txt = summary.toString();
         m_pageInfoEdit->setText(txt);
     }
+
+    JSAppBridge bridge(this);
+    QString bridgeName = QString("VdomBridge_%1").arg(rand() % 999999 + 1);
+    frame->addToJavaScriptWindowObject(bridgeName, &bridge);
 }
 
 void MainWindow::annotateWebPage(const QVariant& map) {
