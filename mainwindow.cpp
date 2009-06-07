@@ -177,7 +177,7 @@ void MainWindow::createSideBar() {
     m_itemInfoEdit->setReadOnly(true);
     sidebarLayout->addWidget(m_itemInfoEdit);
 
-    label = new QLabel(tr("Page item summary"), m_sidebar);
+    label = new QLabel(tr("Page Summary"), m_sidebar);
     sidebarLayout->addWidget(label);
     m_pageInfoEdit = new QTextEdit(m_sidebar);
     m_pageInfoEdit->setReadOnly(true);
