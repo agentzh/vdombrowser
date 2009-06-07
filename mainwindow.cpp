@@ -73,7 +73,7 @@ void MainWindow::loadFinished(bool done) {
             QMessageBox::NoButton);
         return;
     }
-    qDebug() << "Loaded URL " << m_view->url().toEncoded() << "." << endl;
+    //qDebug() << "Loaded URL " << m_view->url().toEncoded() << "." << endl;
     m_urlEdit->setText(m_view->url().toEncoded());
     addUrlToList();
 
