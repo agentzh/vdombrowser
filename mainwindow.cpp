@@ -61,7 +61,7 @@ void MainWindow::changeLocation() {
     if (!m_enableJavascript) {
         m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
     }
-    qDebug() << "Loading URL " << url.toEncoded() << "..." << endl;
+    //qDebug() << "Loading URL " << url.toEncoded() << "..." << endl;
     m_view->page()->mainFrame()->load(url);
     m_view->setFocus(Qt::OtherFocusReason);
 }
