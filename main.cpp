@@ -11,7 +11,7 @@
 #include <QDebug>
 #include <QPrintPreviewDialog>
 
-#include <QVector>
+//#include <QVector>
 #include <QTextStream>
 #include <QFile>
 #include <cstdio>
