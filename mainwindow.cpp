@@ -485,7 +485,7 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
                 !y.isNull() && y.canConvert<int>()) {
             //qDebug() << "Scroll the page to point (" << x.toInt() <<
                 //"," << y.toInt() << ")" << endl;
-            frame->scroll(x.toInt(), y.toInt());
+            frame->setScrollPosition(QPoint(x.toInt(), y.toInt()));
         }
     }
 
