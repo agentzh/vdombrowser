@@ -1,10 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "lineedit.h"
-#include "aboutdialog.h"
-#include "hunterconfigdialog.h"
-
 /* from QJson: http://qjson.sourceforge.net/docs/index.html */
 #include <qjson/json_driver.hh>
 #include <qwebvdom.h> /* added to WebCore by Yahoo! China EEEE */
@@ -12,6 +8,10 @@
 #include <qwebframe.h>
 #include <qwebsettings.h>
 #include <QtGui>
+
+#include "lineedit.h"
+#include "aboutdialog.h"
+#include "hunterconfigdialog.h"
 
 class MainWindow : public QMainWindow
 {

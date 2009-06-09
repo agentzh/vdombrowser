@@ -15,11 +15,23 @@ HEADERS += aboutdialog.h \
            webpage.h
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
-DESTDIR = .
+DESTDIR = $$PWD
 LIBS += -lqjson
 
+BASE_DIR = $$PWD
 QT+=xml network webkit
 QMAKE_RPATHDIR = $$OUTPUT_DIR/lib $$QMAKE_RPATHDIR
+
+isEmpty(OUTPUT_DIR) {
+    CONFIG(release):OUTPUT_DIR=$$PWD
+    CONFIG(debug):OUTPUT_DIR=$$PWD
+}
+
+DEFINES += USE_SYSTEM_MALLOC
+CONFIG(release) {
+    DEFINES += NDEBUG
+}
+DEFINES += BUILDING_QT__=1
 
 CONFIG += $$(QT_WEBKIT)
 webkit_trunk {

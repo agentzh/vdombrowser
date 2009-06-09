@@ -6,8 +6,8 @@ if [ -z "$QTDIR" ]; then
     export QTDIR=/opt/qt4.5
 fi
 export PATH=$QTDIR/bin:$PATH
-make distclean
-qmake "CONFIG-=debug" -r
+#make distclean
+/opt/qt4.5/bin/qmake "CONFIG-=debug" -r
 #qmake -r
 make
 
