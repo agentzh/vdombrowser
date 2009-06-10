@@ -418,6 +418,7 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
         return;
     }
     QString json = QString::fromUtf8(file.readAll());
+    //qDebug() << "RAW JSON: " << json << endl;
     file.close();
     if (json.isEmpty()) {
         QMessageBox::warning(this, tr("Hunter Result File Loader"),
@@ -438,7 +439,7 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
             QMessageBox::NoButton);
         return;
     }
-    //qDebug() << res << endl;
+    //qDebug() << "Res: " << res << endl;
     if (!res.canConvert<QVariantMap>()) {
         QMessageBox::warning(this, tr("Hunter Result File Loader"),
             QString("Result file %1 does not contain a JSON object.")
@@ -573,6 +574,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                                 .arg(m_webvdom->dumpStrAsJson(
                                         titleVar.toString()))
                                 .arg(i);
+                        //qDebug() << "JSON: " << js << endl;
                         js += QString("box.addEventListener('mouseout',"
                             "function (e) {"
                               "nodes = document.getElementsByClassName('vdom-group-%1');"
@@ -584,7 +586,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                             "true);").arg(i);
                         //qDebug() << js << endl;
                     }
-                    // qDebug() << i << ":" << j << ": " << js << endl;
+                    //qDebug() << i << ":" << j << ": " << js << endl;
                     QVariant res = evalJS(js + "true");
                     //if (!res.isNull()) {
                     //qDebug() << "res: " << res << endl;
