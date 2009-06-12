@@ -23,7 +23,7 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     connect(m_iteratorConfig, SIGNAL(accepted()),
             this, SLOT(saveIteratorConfig()));
 
-    m_iterPrevButton = new QPushButton(tr("Prev"), this);
+    m_iterPrevButton = new QPushButton(tr("P&rev"), this);
     m_iterNextButton = new QPushButton(tr("&Next"), this);
 
     m_settings = new QSettings(
