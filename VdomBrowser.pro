@@ -7,7 +7,8 @@ SOURCES += iteratorconfigdialog.cpp \
            mainwindow.cpp \
            webpage.cpp \
            main.cpp
-HEADERS += iteratorconfigdialog.h \
+HEADERS += iterator.h \
+           iteratorconfigdialog.h \
            aboutdialog.h \
            hunterconfigdialog.h \
            version.h \

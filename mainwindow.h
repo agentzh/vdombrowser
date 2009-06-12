@@ -13,6 +13,7 @@
 #include "aboutdialog.h"
 #include "hunterconfigdialog.h"
 #include "iteratorconfigdialog.h"
+#include "iterator.h"
 
 class MainWindow : public QMainWindow
 {
@@ -34,6 +35,9 @@ protected:
 
 protected slots:
 
+    void iterPrev();
+    void iterNext();
+
     void huntOnly();
 
     void hunterStarted() {
@@ -50,11 +54,7 @@ protected slots:
         m_itemInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardError()));
     }
 
-    void loadUrl(const QUrl& url) {
-        //fprintf(stderr, "Loading new url...");
-        m_view->load(url);
-        m_view->setFocus(Qt::OtherFocusReason);
-    }
+    void loadUrl(const QUrl& url);
 
     void updateUrl(const QUrl& url) {
         m_urlEdit->setText(url.toEncoded());
@@ -158,17 +158,12 @@ protected slots:
     void saveHunterConfig();
     void saveIteratorConfig();
 
-    void execHunterConfig() {
-        initHunterConfig();
-        m_hunterConfig->exec();
-    }
-
-    void execIteratorConfig() {
-        initIteratorConfig();
-        m_iteratorConfig->exec();
-    }
+    void execHunterConfig();
+    void execIteratorConfig();
 
 private:
+
+    void initIterator();
 
     QVariant evalJS(const QString& js);
 
@@ -238,7 +233,11 @@ private:
     QPushButton* m_iterPrevButton;
     QPushButton* m_iterNextButton;
 
+    QLabel* m_iterLabel;
+
     JSonDriver m_jsonDriver;
+
+    Iterator m_iterator;
 };
 
 #endif

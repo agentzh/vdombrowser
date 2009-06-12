@@ -9,5 +9,5 @@ export PATH=$QTDIR/bin:$PATH
 #make distclean
 /opt/qt4.5/bin/qmake "CONFIG-=debug" -r
 #qmake -r
-make
+make -j2
 

@@ -2,7 +2,11 @@
 #include "webpage.h"
 #include <stdlib.h>
 
+const static int MAX_FILE_LINE_LEN = 2048;
+
 MainWindow::MainWindow(const QString& url): currentZoom(100) {
+    m_iterLabel = new QLabel(this);
+
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "loadUrl");
     m_hunterConfig = new HunterConfigDialog(this);
     connect(m_hunterConfig, SIGNAL(accepted()),
@@ -24,7 +28,9 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
             this, SLOT(saveIteratorConfig()));
 
     m_iterPrevButton = new QPushButton(tr("P&rev"), this);
+    connect(m_iterPrevButton, SIGNAL(clicked()), SLOT(iterPrev()));
     m_iterNextButton = new QPushButton(tr("&Next"), this);
+    connect(m_iterNextButton, SIGNAL(clicked()), SLOT(iterNext()));
 
     m_settings = new QSettings(
         QSettings::UserScope,
@@ -53,7 +59,7 @@ void MainWindow::changeLocation() {
     //QUrl url = guessUrlFromString(urlEdit->text());
     //
     QString urlStr = m_urlEdit->text().trimmed();
-    QRegExp test(QLatin1String("^[a-zA-Z]+\\:.*"));
+    QRegExp test("^[a-zA-Z]+\\:.*");
 
     // Check if it looks like a qualified URL. Try parsing it and see.
     bool hasSchema = test.exactMatch(urlStr);
@@ -65,12 +71,8 @@ void MainWindow::changeLocation() {
     url.setEncodedUrl(urlStr.toUtf8(), QUrl::StrictMode);
     m_urlEdit->setText(url.toEncoded());
     // we might have enabled JS for UI interaction...
-    if (!m_enableJavascript) {
-        m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
-    }
     //qDebug() << "Loading URL " << url.toEncoded() << "..." << endl;
-    m_view->page()->mainFrame()->load(url);
-    m_view->setFocus(Qt::OtherFocusReason);
+    loadUrl(url);
 }
 
 void MainWindow::loadFinished(bool done) {
@@ -212,11 +214,15 @@ void MainWindow::createProgressBar() {
     m_progress->hide();
     statusBar()->addPermanentWidget(m_progress);
 
+    m_iterLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    statusBar()->addPermanentWidget(m_iterLabel);
+
     m_hunterLabel = new QLabel(this);
     m_hunterLabel->hide();
     m_hunterLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     statusBar()->addPermanentWidget(m_hunterLabel);
 
+    //m_iterLabel->show();
     connect(m_view, SIGNAL(loadProgress(int)), m_progress, SLOT(show()));
     connect(m_view, SIGNAL(loadProgress(int)), m_progress, SLOT(setValue(int)));
     connect(m_view, SIGNAL(loadFinished(bool)), m_progress, SLOT(hide()));
@@ -355,6 +361,7 @@ void MainWindow::writeSettings() {
 
     m_settings->setValue("iteratorEnabled", QVariant(m_iteratorEnabled));
     m_settings->setValue("urlListFile", QVariant(m_urlListFile));
+    m_settings->setValue("iteratorCurrentIndex", QVariant(m_iterator.cur()));
 
     m_settings->endGroup();
 }
@@ -381,6 +388,12 @@ void MainWindow::readSettings() {
     m_urlListFile = m_settings->value("urlListFile").toString();
     initIteratorConfig();
 
+    m_iterator.setCur(m_settings->value("iteratorCurrentIndex", 0).toInt());
+    initIterator();
+    if (m_iteratorEnabled) {
+        m_iterLabel->show();
+    }
+
     m_settings->endGroup();
 }
 
@@ -404,6 +417,8 @@ void MainWindow::saveIteratorConfig() {
     m_iterPrevButton->setEnabled(m_iteratorEnabled);
     m_iterNextButton->setEnabled(m_iteratorEnabled);
     m_urlListFile = m_iteratorConfig->listFile();
+
+    initIterator();
 }
 
 void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
@@ -652,6 +667,11 @@ void MainWindow::initIteratorConfig() {
     m_iteratorConfig->setIteratorEnabled(m_iteratorEnabled);
     m_iterPrevButton->setEnabled(m_iteratorEnabled);
     m_iterNextButton->setEnabled(m_iteratorEnabled);
+    if (m_iteratorEnabled) {
+        m_iterLabel->show();
+    } else {
+        m_iterLabel->hide();
+    }
     //update();
     m_iteratorConfig->setListFile(m_urlListFile);
 }
@@ -661,12 +681,112 @@ void MainWindow::addUrlToList() {
     opts |= QUrl::RemoveScheme;
     opts |= QUrl::RemoveUserInfo;
     opts |= QUrl::StripTrailingSlash;
-    QString s = m_view->url().toString(opts);
+    QString s = m_view->url().toEncoded(opts);
     s = s.mid(2);
     if (!s.isEmpty()) {
         if (!m_urlList.contains(s))
             m_urlList += s;
         m_urlCompleterModel.setStringList(m_urlList);
     }
+}
+
+void MainWindow::iterPrev() {
+    int ind = m_iterator.prev();
+    if (ind < 0) {
+        qDebug() << "Iterator index negative: " << ind << endl;
+        return;
+    }
+    if (ind >= m_urlList.count()) {
+        m_iterator.setCur(0);
+        m_iterator.setCount(m_urlList.count());
+        ind = 0;
+    }
+    m_iterLabel->setText("Page " + QString::number(ind));
+    if (ind >= 0 && ind < m_urlList.count()) {
+        QString url = "http://";
+        url += m_urlList[ind];
+        m_urlEdit->setText(url);
+        loadUrl(url);
+    }
+}
+
+void MainWindow::iterNext() {
+    int ind = m_iterator.next();
+    if (ind < 0) {
+        qDebug() << "Iterator index negative: " << ind << endl;
+        return;
+    }
+    if (ind >= m_urlList.count()) {
+        m_iterator.setCur(0);
+        m_iterator.setCount(m_urlList.count());
+        ind = 0;
+    }
+    m_iterLabel->setText("Page " + QString::number(ind));
+    if (ind >= 0 && ind < m_urlList.count()) {
+        QString url = "http://";
+        url += m_urlList[ind];
+        m_urlEdit->setText(url);
+        loadUrl(url);
+    }
+}
+
+void MainWindow::initIterator() {
+    if (!m_iteratorEnabled) {
+        return;
+    }
+    QFile file(m_urlListFile);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("URL List File Loader"),
+            QString("Failed to load url list file %1: %2")
+                .arg(m_urlListFile).arg(file.errorString()),
+                QMessageBox::NoButton);
+        file.close();
+        return;
+    }
+    m_urlList.clear();
+    QString line = QString::fromUtf8(file.readLine(MAX_FILE_LINE_LEN));
+    QRegExp emptyLinePat("^\\s*$");
+    while (!line.isEmpty()) {
+        if (emptyLinePat.exactMatch(line)) {
+            //qDebug() << "Empty line pattern found.\n";
+        } else {
+            //qDebug() << "Read line " << line;
+            line = line.trimmed();
+            line.replace(QRegExp("^[A-Za-z]+://"), "");
+            qDebug() << "URL: " << line << endl;
+            m_urlList.push_back(line);
+        }
+        line = QString::fromUtf8(file.readLine(MAX_FILE_LINE_LEN));
+    }
+    //QString json = QString::fromUtf8(file.readAll());
+    //qDebug() << "RAW JSON: " << json << endl;
+    file.close();
+    m_iterator.setCount(m_urlList.count());
+    m_iterLabel->setText("Page " + QString::number(m_iterator.cur()));
+}
+
+void MainWindow::execHunterConfig() {
+    initHunterConfig();
+    m_hunterConfig->exec();
+}
+
+void MainWindow::execIteratorConfig() {
+    initIteratorConfig();
+    m_iteratorConfig->exec();
+}
+
+void MainWindow::loadUrl(const QUrl& url) {
+    //fprintf(stderr, "Loading new url...");
+    QWebPage* page = m_view->page();
+    //page->blockSignals(true);
+    m_view->stop();
+    //page->blockSignals(false);
+
+    if (!m_enableJavascript) {
+        m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, false);
+    }
+
+    page->mainFrame()->load(url);
+    m_view->setFocus(Qt::OtherFocusReason);
 }
 
