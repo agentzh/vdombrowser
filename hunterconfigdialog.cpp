@@ -47,7 +47,7 @@ HunterConfigDialog::HunterConfigDialog(QWidget *parent): QDialog(parent) {
     layout->addWidget(formGroup);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout;
-    buttonsLayout->addSpacing(300);
+    buttonsLayout->addSpacing(450);
 
     button = new QPushButton(tr("&Save"), this);
     connect(button, SIGNAL(clicked()),

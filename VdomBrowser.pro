@@ -1,12 +1,14 @@
 TEMPLATE = app
-SOURCES += aboutdialog.cpp \
+SOURCES += iteratorconfigdialog.cpp \
+           aboutdialog.cpp \
            hunterconfigdialog.cpp \
            lineedit.cpp \
            urlloader.cpp \
            mainwindow.cpp \
            webpage.cpp \
            main.cpp
-HEADERS += aboutdialog.h \
+HEADERS += iteratorconfigdialog.h \
+           aboutdialog.h \
            hunterconfigdialog.h \
            version.h \
            lineedit.h \

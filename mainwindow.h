@@ -12,6 +12,7 @@
 #include "lineedit.h"
 #include "aboutdialog.h"
 #include "hunterconfigdialog.h"
+#include "iteratorconfigdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -155,10 +156,16 @@ protected slots:
     }
 
     void saveHunterConfig();
+    void saveIteratorConfig();
 
     void execHunterConfig() {
         initHunterConfig();
         m_hunterConfig->exec();
+    }
+
+    void execIteratorConfig() {
+        initIteratorConfig();
+        m_iteratorConfig->exec();
     }
 
 private:
@@ -167,6 +174,8 @@ private:
 
     void addUrlToList();
     void initHunterConfig();
+
+    void initIteratorConfig();
 
     QVector<int> zoomLevels;
     int currentZoom;
@@ -204,6 +213,8 @@ private:
     HunterConfigDialog* m_hunterConfig;
     QLabel *m_hunterLabel;
 
+    IteratorConfigDialog* m_iteratorConfig;
+
     QStringList m_urlList;
     QStringListModel m_urlCompleterModel;
     QSettings* m_settings;
@@ -217,9 +228,15 @@ private:
     QString m_hunterPath;
     QString m_vdomPath;
 
+    bool m_iteratorEnabled;
+    QString m_urlListFile;
+
     QWebVDom* m_webvdom;
     QProcess m_hunter;
     QPushButton* m_huntButton;
+
+    QPushButton* m_iterPrevButton;
+    QPushButton* m_iterNextButton;
 
     JSonDriver m_jsonDriver;
 };

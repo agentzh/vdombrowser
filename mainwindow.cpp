@@ -19,6 +19,13 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     m_huntButton = new QPushButton(tr("Hun&t"), this);
     connect(m_huntButton, SIGNAL(clicked()), SLOT(huntOnly()));
 
+    m_iteratorConfig = new IteratorConfigDialog(this);
+    connect(m_iteratorConfig, SIGNAL(accepted()),
+            this, SLOT(saveIteratorConfig()));
+
+    m_iterPrevButton = new QPushButton(tr("Prev"), this);
+    m_iterNextButton = new QPushButton(tr("&Next"), this);
+
     m_settings = new QSettings(
         QSettings::UserScope,
         qApp->organizationDomain(),
@@ -228,6 +235,8 @@ void MainWindow::createToolBar() {
     bar->addWidget(loadButton);
 
     bar->addWidget(m_huntButton);
+    bar->addWidget(m_iterPrevButton);
+    bar->addWidget(m_iterNextButton);
 }
 
 void MainWindow::createMenus() {
@@ -319,6 +328,7 @@ void MainWindow::createSettingsMenu() {
     }
     prefMenu->addSeparator();
     prefMenu->addAction(tr("X &Hunter"), this, SLOT(execHunterConfig()));
+    prefMenu->addAction(tr("&URL Iterator"), this, SLOT(execIteratorConfig()));
 }
 
 void MainWindow::createHelpMenu() {
@@ -343,6 +353,9 @@ void MainWindow::writeSettings() {
     m_settings->setValue("hunterPath", m_hunterPath);
     m_settings->setValue("vdomPath", m_vdomPath);
 
+    m_settings->setValue("iteratorEnabled", QVariant(m_iteratorEnabled));
+    m_settings->setValue("urlListFile", QVariant(m_urlListFile));
+
     m_settings->endGroup();
 }
 
@@ -364,6 +377,10 @@ void MainWindow::readSettings() {
     m_vdomPath   = m_settings->value("vdomPath").toString();
     initHunterConfig();
 
+    m_iteratorEnabled = m_settings->value("iteratorEnabled").toBool();
+    m_urlListFile = m_settings->value("urlListFile").toString();
+    initIteratorConfig();
+
     m_settings->endGroup();
 }
 
@@ -380,6 +397,13 @@ void MainWindow::saveHunterConfig() {
     m_hunterPath = m_hunterConfig->progPath();
     m_vdomPath   = m_hunterConfig->vdomPath();
     //qDebug() << "Saving hunter config... (hunter: " << m_hunterPath << ")";
+}
+
+void MainWindow::saveIteratorConfig() {
+    m_iteratorEnabled = m_iteratorConfig->iteratorEnabled();
+    m_iterPrevButton->setEnabled(m_iteratorEnabled);
+    m_iterNextButton->setEnabled(m_iteratorEnabled);
+    m_urlListFile = m_iteratorConfig->listFile();
 }
 
 void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
@@ -622,6 +646,14 @@ void MainWindow::initHunterConfig() {
     m_hunterConfig->setHunterEnabled(m_hunterEnabled);
     m_hunterConfig->setProgPath(m_hunterPath);
     m_hunterConfig->setVdomPath(m_vdomPath);
+}
+
+void MainWindow::initIteratorConfig() {
+    m_iteratorConfig->setIteratorEnabled(m_iteratorEnabled);
+    m_iterPrevButton->setEnabled(m_iteratorEnabled);
+    m_iterNextButton->setEnabled(m_iteratorEnabled);
+    //update();
+    m_iteratorConfig->setListFile(m_urlListFile);
 }
 
 void MainWindow::addUrlToList() {
