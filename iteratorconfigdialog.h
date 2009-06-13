@@ -16,7 +16,7 @@ public:
     }
 
     void setListFile(const QString& path) {
-        m_listFileEdit->setText(path);
+        m_listFileEdit->setText(path.trimmed());
     }
 
     bool iteratorEnabled() {
@@ -24,7 +24,7 @@ public:
     }
 
     QString listFile() const {
-        return m_listFileEdit->text();
+        return m_listFileEdit->text().trimmed();
     }
 
 public slots:

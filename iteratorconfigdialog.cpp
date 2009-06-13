@@ -56,18 +56,18 @@ IteratorConfigDialog::IteratorConfigDialog(QWidget *parent): QDialog(parent) {
 void IteratorConfigDialog::accept() {
     //qDebug() << "Checking form values...\n";
     if (m_formGroup->isChecked()) {
-        QString progPath = m_listFileEdit->text();
-        if (progPath.isEmpty()) {
+        QString listFile = m_listFileEdit->text().trimmed();
+        if (listFile.isEmpty()) {
             croak(tr("URL list file path is empty."));
             m_listFileEdit->selectAll();
             return;
         }
-        if (! QFile::exists(progPath)) {
-            croak(tr("URL list file not found."));
+        if (! QFile::exists(listFile)) {
+            croak(tr("URL list file \"%1\" not found.").arg(listFile));
             m_listFileEdit->selectAll();
             return;
         }
-        QFile::Permissions perms = QFile::permissions(progPath);
+        QFile::Permissions perms = QFile::permissions(listFile);
         if (! (perms & QFile::ReadUser)) {
             croak(tr("URL list file is not readable."));
             m_listFileEdit->selectAll();
