@@ -11,7 +11,7 @@ public:
     }
 
     void setCount (int count) {
-        qDebug() << "Setting count to " << count << endl;
+        //qDebug() << "Setting count to " << count << endl;
         m_count = count;
         m_cur = -1;
     }
