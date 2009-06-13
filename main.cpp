@@ -19,7 +19,7 @@
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    QString url = QString("%1/%2").arg(QDir::homePath()).arg(QLatin1String("index.html"));
+    QString url = "http://www.yahoo.cn";
 
     QWebSettings::setMaximumPagesInCache(20);
 
