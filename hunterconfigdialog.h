@@ -16,11 +16,11 @@ public:
     }
 
     void setProgPath(const QString& path) {
-        progPathEdit->setText(path);
+        progPathEdit->setText(path.trimmed());
     }
 
     void setVdomPath(const QString& path) {
-        vdomPathEdit->setText(path);
+        vdomPathEdit->setText(path.trimmed());
     }
 
     bool hunterEnabled() {
@@ -28,11 +28,11 @@ public:
     }
 
     QString progPath() const {
-        return progPathEdit->text();
+        return progPathEdit->text().trimmed();
     }
 
     QString vdomPath() const {
-        return vdomPathEdit->text();
+        return vdomPathEdit->text().trimmed();
     }
 
 public slots:

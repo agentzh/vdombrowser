@@ -71,25 +71,25 @@ HunterConfigDialog::HunterConfigDialog(QWidget *parent): QDialog(parent) {
 void HunterConfigDialog::accept() {
     //qDebug() << "Checking form values...\n";
     if (formGroup->isChecked()) {
-        QString progPath = progPathEdit->text();
+        QString progPath = progPathEdit->text().trimmed();
         if (progPath.isEmpty()) {
             croak(tr("Hunter Program Path is empty."));
             progPathEdit->selectAll();
             return;
         }
         if (! QFile::exists(progPath)) {
-            croak(tr("Hunter Program File not found."));
+            croak(tr("Hunter Program File \"%1\" not found.").arg(progPath));
             progPathEdit->selectAll();
             return;
         }
         QFile::Permissions perms = QFile::permissions(progPath);
         if (! (perms & QFile::ExeUser)) {
-            croak(tr("Hunter Program File is not executable."));
+            croak(tr("Hunter Program File \"%1\" is not executable.").arg(progPath));
             progPathEdit->selectAll();
             return;
         }
 
-        QString vdomPath = vdomPathEdit->text();
+        QString vdomPath = vdomPathEdit->text().trimmed();
         if (vdomPath.isEmpty()) {
             croak(tr("VDOM Output File Path is empty."));
             vdomPathEdit->selectAll();
@@ -99,7 +99,7 @@ void HunterConfigDialog::accept() {
             //qDebug() << "VDOM Path " << vdomPath << " exists.\n";
             perms = QFile::permissions(vdomPath);
             if (! (perms & QFile::WriteUser)) {
-                croak(tr("VDOM Output File Path is not writable."));
+                croak(tr("VDOM Output File \"%1\" is not writable.").arg(vdomPath));
                 vdomPathEdit->selectAll();
                 return;
             }

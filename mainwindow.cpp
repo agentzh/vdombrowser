@@ -78,7 +78,7 @@ void MainWindow::changeLocation() {
 void MainWindow::loadFinished(bool done) {
     if (!done) {
         QMessageBox::warning(this, tr("Browser Loader"),
-            QString("Failed to open resource %1.").arg(m_urlEdit->text()),
+            QString("Failed to open resource %1.").arg(m_urlEdit->text().trimmed()),
             QMessageBox::NoButton);
         return;
     }
