@@ -753,7 +753,7 @@ void MainWindow::initIterator() {
             //qDebug() << "Read line " << line;
             line = line.trimmed();
             line.replace(QRegExp("^[A-Za-z]+://"), "");
-            qDebug() << "URL: " << line << endl;
+            //qDebug() << "URL: " << line << endl;
             m_urlList.push_back(line);
         }
         line = QString::fromUtf8(file.readLine(MAX_FILE_LINE_LEN));
