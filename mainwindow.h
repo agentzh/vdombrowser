@@ -59,9 +59,8 @@ protected slots:
         m_itemInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardError()));
     }
 
-<<<<<<< HEAD:VdomBrowser/mainwindow.h
     void loadUrl(const QUrl& url);
-=======
+
     // viwie slots
     void showTextFieldDialog();
     void showImageFieldDialog();
@@ -75,13 +74,6 @@ protected slots:
     void tmpSaveViwie();
     void permanentSaveViwie();
     void showDetailField(const QVariant& detail);
-
-    void loadUrl(const QUrl& url) {
-        //fprintf(stderr, "Loading new url...");
-        m_view->load(url);
-        m_view->setFocus(Qt::OtherFocusReason);
-    }
->>>>>>> add markit project:VdomBrowser/mainwindow.h
 
     void updateUrl(const QUrl& url) {
         m_urlEdit->setText(url.toEncoded());
