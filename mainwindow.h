@@ -15,6 +15,11 @@
 #include "iteratorconfigdialog.h"
 #include "iterator.h"
 
+#include <qwebselected.h>
+#include "fielddialog.h"
+#include "viwiedialog.h"
+#include "webview.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -54,7 +59,29 @@ protected slots:
         m_itemInfoEdit->append(QString::fromUtf8(m_hunter.readAllStandardError()));
     }
 
+<<<<<<< HEAD:VdomBrowser/mainwindow.h
     void loadUrl(const QUrl& url);
+=======
+    // viwie slots
+    void showTextFieldDialog();
+    void showImageFieldDialog();
+    void showViwieDialog();
+    void hideViwieDialog();
+
+    void addField();
+    void overrideField();
+    void deleteField();
+
+    void tmpSaveViwie();
+    void permanentSaveViwie();
+    void showDetailField(const QVariant& detail);
+
+    void loadUrl(const QUrl& url) {
+        //fprintf(stderr, "Loading new url...");
+        m_view->load(url);
+        m_view->setFocus(Qt::OtherFocusReason);
+    }
+>>>>>>> add markit project:VdomBrowser/mainwindow.h
 
     void updateUrl(const QUrl& url) {
         m_urlEdit->setText(url.toEncoded());
@@ -201,7 +228,7 @@ private:
     QTextEdit* m_itemInfoEdit;
     QTextEdit* m_pageInfoEdit;
 
-    QWebView *m_view;
+    WebView *m_view;
     LineEdit *m_urlEdit;
     QWidget *m_sidebar;
     QProgressBar *m_progress;
@@ -209,6 +236,13 @@ private:
     QLabel *m_hunterLabel;
 
     IteratorConfigDialog* m_iteratorConfig;
+
+    bool m_viwieEnabled;
+    void createViwieUI();
+    QWebSelected* m_webSelected;
+    ViwieDialog *m_viwieDialog;
+    FieldDialog *m_fieldDialog;
+    QVariant viwieTags;
 
     QStringList m_urlList;
     QStringListModel m_urlCompleterModel;

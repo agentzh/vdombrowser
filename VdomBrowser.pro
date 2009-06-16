@@ -5,7 +5,10 @@ SOURCES += iteratorconfigdialog.cpp \
            lineedit.cpp \
            urlloader.cpp \
            mainwindow.cpp \
+           webview.cpp \
            webpage.cpp \
+           fielddialog.cpp \
+           viwiedialog.cpp \
            main.cpp
 HEADERS += iterator.h \
            iteratorconfigdialog.h \
@@ -15,7 +18,11 @@ HEADERS += iterator.h \
            lineedit.h \
            urlloader.h \
            mainwindow.h \
-           webpage.h
+           webview.h \
+           webpage.h \
+           fielddialog.h \
+           viwiedialog.h
+
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
 DESTDIR = $$PWD
