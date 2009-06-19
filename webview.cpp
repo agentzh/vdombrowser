@@ -21,17 +21,17 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
         menu->addAction(tr("&Add Text Field"), this, SIGNAL(showTextFieldDialog()));
     }
 
-    if (!r.imageUrl().isEmpty()) {
+    //if (!r.imageUrl().isEmpty()) {
         if (!menu->isEmpty())
             menu->addSeparator();
         hitPos = event->pos();
         menu->addAction(tr("&Add Image Field"), this, SIGNAL(showImageFieldDialog()));
-    }
+   // }
 
     if (!menu->isEmpty())
             menu->addSeparator();
         menu->addAction(tr("&Viwie"), this, SIGNAL(showViwieDialog()));
- 
+
     if (menu->isEmpty()) {
         delete menu;
         menu = page()->createStandardContextMenu();
@@ -39,7 +39,7 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
     menu->exec(mapToGlobal(event->pos()));
     delete menu;
 
-    //QWebView::contextMenuEvent(event);
+    QWebView::contextMenuEvent(event);
 }
 
 
