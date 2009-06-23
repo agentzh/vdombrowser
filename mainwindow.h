@@ -222,7 +222,7 @@ private:
 
     WebView *m_view;
     LineEdit *m_urlEdit;
-    QWidget *m_sidebar;
+    QSplitter *m_sidebar;
     QProgressBar *m_progress;
     HunterConfigDialog* m_hunterConfig;
     QLabel *m_hunterLabel;
@@ -264,6 +264,8 @@ private:
     JSonDriver m_jsonDriver;
 
     Iterator m_iterator;
+
+    QSplitter* m_mainSplitter;
 };
 
 #endif

@@ -135,11 +135,16 @@ void MainWindow::createCentralWidget() {
     createSideBar();
     createWebView();
 
-    QSplitter* splitter = new QSplitter(this);
-    splitter->addWidget(m_view);
-    splitter->addWidget(m_sidebar);
+    m_mainSplitter = new QSplitter(Qt::Horizontal, this);
+    m_mainSplitter->addWidget(m_view);
+    m_mainSplitter->addWidget(m_sidebar);
 
-    setCentralWidget(splitter);
+    setCentralWidget(m_mainSplitter);
+
+    m_settings->beginGroup("MainWindow");
+    //qDebug() << "splitter state fron settings: " << m_settings->value("sidebarSplitterSizes") << endl;
+    qDebug() << "restore main splitter: " << m_mainSplitter->restoreState(m_settings->value("mainSplitterSizes").toByteArray()) << endl;
+    m_settings->endGroup();
 }
 
 void MainWindow::createWebView() {
@@ -182,21 +187,44 @@ void MainWindow::createWebView() {
 }
 
 void MainWindow::createSideBar() {
-    m_sidebar = new QWidget(this);
-    QVBoxLayout *sidebarLayout = new QVBoxLayout(m_sidebar);
-    m_sidebar->setLayout(sidebarLayout);
+    //m_sidebar = new QWidget(this);
+    //QVBoxLayout* sidebarLayout = new QVBoxLayout(m_sidebar);
+    //m_sidebar->setLayout(sidebarLayout);
 
-    QLabel* label = new QLabel(tr("Active item description"), m_sidebar);
-    sidebarLayout->addWidget(label);
+    m_sidebar = new QSplitter(Qt::Vertical, this);
+
+    QWidget* item = new QWidget(this);
+    QWidget* page = new QWidget(this);
+
+    QVBoxLayout* itemLayout = new QVBoxLayout(item);
+
+    QVBoxLayout* pageLayout = new QVBoxLayout(page);
+
+    QLabel* label = new QLabel(tr("Active item description"), item);
+    itemLayout->addWidget(label);
     m_itemInfoEdit = new QTextEdit(m_sidebar);
     m_itemInfoEdit->setReadOnly(true);
-    sidebarLayout->addWidget(m_itemInfoEdit);
+    itemLayout->addWidget(m_itemInfoEdit);
 
-    label = new QLabel(tr("Page Summary"), m_sidebar);
-    sidebarLayout->addWidget(label);
+    label = new QLabel(tr("Page Summary"), page);
+    pageLayout->addWidget(label);
     m_pageInfoEdit = new QTextEdit(m_sidebar);
     m_pageInfoEdit->setReadOnly(true);
-    sidebarLayout->addWidget(m_pageInfoEdit);
+    pageLayout->addWidget(m_pageInfoEdit);
+
+    item->setLayout(itemLayout);
+    page->setLayout(pageLayout);
+
+    m_sidebar->addWidget(item);
+    m_sidebar->addWidget(page);
+
+    m_settings->beginGroup("MainWindow");
+    //qDebug() << "splitter state fron settings: " << m_settings->value("sidebarSplitterSizes") << endl;
+    qDebug() << "restore side bar splitter: " << m_sidebar->restoreState(m_settings->value("sidebarSplitterSizes").toByteArray()) << endl;
+    m_settings->endGroup();
+
+    //sidebarLayout->addWidget(label);
+    //m_sidebar->addWidget(splitter);
 }
 
 void MainWindow::createUrlEdit() {
@@ -502,7 +530,9 @@ void MainWindow::writeSettings() {
 
     m_settings->setValue("iteratorEnabled", QVariant(m_iteratorEnabled));
     m_settings->setValue("urlListFile", QVariant(m_urlListFile));
-    m_settings->setValue("iteratorCurrentIndex", QVariant(m_iterator.cur()));
+    //m_settings->setValue("iteratorCurrentIndex", QVariant(m_iterator.cur()));
+    m_settings->setValue("sidebarSplitterSizes", m_sidebar->saveState());
+    m_settings->setValue("mainSplitterSizes", m_mainSplitter->saveState());
 
     m_settings->endGroup();
 }
@@ -529,7 +559,7 @@ void MainWindow::readSettings() {
     m_urlListFile = m_settings->value("urlListFile").toString();
     initIteratorConfig();
 
-    m_iterator.setCur(m_settings->value("iteratorCurrentIndex", 0).toInt());
+    //m_iterator.setCur(m_settings->value("iteratorCurrentIndex", 0).toInt());
     initIterator();
     if (m_iteratorEnabled) {
         m_iterLabel->show();
@@ -558,6 +588,11 @@ void MainWindow::saveIteratorConfig() {
     m_iterPrevButton->setEnabled(m_iteratorEnabled);
     m_iterNextButton->setEnabled(m_iteratorEnabled);
     m_urlListFile = m_iteratorConfig->listFile();
+    if (m_iteratorEnabled) {
+        m_iterLabel->show();
+    } else {
+        m_iterLabel->hide();
+    }
 
     initIterator();
 }
