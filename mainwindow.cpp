@@ -151,7 +151,7 @@ void MainWindow::createWebView() {
     //m_view = new QWebView(this);
     //QWebPage* page = new QWebPage(m_view);
     m_view = new WebView(this);
-    QWebPage* page = webPage();
+    WebPage* page = webPage();
 
     page->settings()->setAttribute(QWebSettings::JavascriptEnabled, m_enableJavascript);
     page->settings()->setAttribute(QWebSettings::PluginsEnabled, m_enablePlugins);
@@ -160,6 +160,7 @@ void MainWindow::createWebView() {
 
     m_view->setPage(page);
     m_webvdom = new QWebVDom(page->mainFrame());
+    page->setUserAgent("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
 
     connect(m_view->page(), SIGNAL(loadFinished(bool)),
             this, SLOT(loadFinished(bool)));
@@ -510,7 +511,7 @@ void MainWindow::permanentSaveViwie() {
 }
 
 
-void MainWindow::showDetailField(const QVariant& detail) {
+void MainWindow::showDetailField(const QVariant& /* detail */) {
 }
 
 void MainWindow::writeSettings() {

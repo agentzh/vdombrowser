@@ -19,6 +19,7 @@
 #include "fielddialog.h"
 #include "viwiedialog.h"
 #include "webview.h"
+#include "webpage.h"
 
 class MainWindow : public QMainWindow
 {
@@ -26,8 +27,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(const QString& url = QString());
 
-    QWebPage* webPage() const {
-        return m_view->page();
+    WebPage* webPage() const {
+        return (WebPage*) m_view->page();
     }
 
     QWebView* webView() const {

@@ -23,3 +23,15 @@ void WebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber
         ": " << message << endl;
 }
 
+QString WebPage::userAgentForUrl(const QUrl& url) const {
+
+  if (!m_userAgent.isNull())
+    return m_userAgent;
+
+  return QWebPage::userAgentForUrl(url);
+}
+
+void WebPage::setUserAgent(const QString& userAgent) {
+    m_userAgent = userAgent;
+}
+
