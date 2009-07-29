@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         if (arg == "-h" || arg == "--help") {
             //argHelp = true;
             help(0);
-        } else if (arg.indexOf("--enable-js=") == 0) {
+        } else if (arg.indexOf("--js=") == 0) {
             QString jsFile = arg.split("=").at(1);
             jsFiles.push_back(jsFile);
         } else if (arg == "-v" || arg == "--version") {
@@ -59,11 +59,15 @@ int main(int argc, char **argv)
             fprintf(stderr, "Invalid command-line option: %s\n\n", arg.toUtf8().data());
             exit(1);
         } else {
-            url = args.at(1);
+            url = arg;
         }
     }
 
     MainWindow window(url);
+    //qDebug() << "js files: " << jsFiles << endl;
+    if (jsFiles.count() > 0) {
+        window.setJSFiles(jsFiles);
+    }
     window.show();
     return app.exec();
 }

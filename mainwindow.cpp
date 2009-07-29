@@ -87,6 +87,11 @@ void MainWindow::loadFinished(bool done) {
     m_urlEdit->setText(m_view->url().toEncoded());
     addUrlToList();
 
+    if (!m_injectedJS.isNull() && m_injectedJS != "") {
+        QVariant res = evalJS(m_injectedJS + "true");
+        qDebug() << "injecting JS res: " << res << endl;
+    }
+
     if (m_hunterEnabled) {
         /* dump VDOM to the external file */
         const QByteArray& vdom = m_webvdom->dump();
@@ -621,7 +626,8 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     QString resFile = m_vdomPath + ".res";
     if (!QFile::exists(resFile)) {
         QMessageBox::warning(this, tr("Hunter Result File Checker"),
-            QString("Hunter result data file \"%1\"not found."),
+            QString("Hunter result data file \"%1\"not found.").
+                arg(resFile),
             QMessageBox::NoButton);
         return;
     }
@@ -716,7 +722,7 @@ void MainWindow::hunterFinished(int exitCode, QProcess::ExitStatus) {
     }
 }
 
-inline QVariant MainWindow::evalJS(const QString& js) {
+QVariant MainWindow::evalJS(const QString& js) {
     return m_view->page()->mainFrame()->evaluateJavaScript(js);
 }
 
@@ -991,5 +997,31 @@ void MainWindow::loadUrl(const QUrl& url) {
 
     page->mainFrame()->load(url);
     m_view->setFocus(Qt::OtherFocusReason);
+}
+
+void MainWindow::setJSFiles(QStringList& jsFiles) {
+    m_injectedJS.clear();
+    for (int i = 0; i < jsFiles.count(); i++) {
+        const QString& fileName = jsFiles[i];
+        //qDebug() << QString("Checking if file %1 is readable...")
+            //.arg(fileName).toUtf8() << endl;
+        if (!QFile::exists(fileName)) {
+            qDebug() <<
+                QString("js file \"%1\" not found.\n").arg(fileName).toUtf8().data();
+            continue;
+        }
+
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qDebug() <<
+                QString("Failed to load js file %1: %2\n")
+                    .arg(fileName).arg(file.errorString()).toUtf8();
+            file.close();
+            continue;
+        }
+        //qDebug() << "Reading file " << fileName << endl;
+        m_injectedJS += QString::fromUtf8(file.readAll()) + "\n";
+    }
+        //qDebug() << "!!! JS: " << m_injectedJS << endl;
 }
 

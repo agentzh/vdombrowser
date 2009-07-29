@@ -35,6 +35,8 @@ public:
         return m_view;
     }
 
+    void setJSFiles(QStringList& jsFiles);
+
 protected:
 
     virtual void closeEvent(QCloseEvent * event);
@@ -267,6 +269,7 @@ private:
     Iterator m_iterator;
 
     QSplitter* m_mainSplitter;
+    QString m_injectedJS;
 };
 
 #endif
