@@ -200,7 +200,7 @@ private:
 
     void createCentralWidget();
     void createWebView();
-    void createSideBar();
+    void createSidebar();
     void createToolBar();
 
     void createMenus();

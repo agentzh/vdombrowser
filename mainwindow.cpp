@@ -132,7 +132,7 @@ void MainWindow::setupUI() {
 }
 
 void MainWindow::createCentralWidget() {
-    createSideBar();
+    createSidebar();
     createWebView();
 
     m_mainSplitter = new QSplitter(Qt::Horizontal, this);
@@ -160,7 +160,9 @@ void MainWindow::createWebView() {
 
     m_view->setPage(page);
     m_webvdom = new QWebVDom(page->mainFrame());
-    page->setUserAgent("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+    //page->setUserAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10");
+    //page->setUserAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; sv-SE) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16");
+    page->setUserAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16");
 
     connect(m_view->page(), SIGNAL(loadFinished(bool)),
             this, SLOT(loadFinished(bool)));
@@ -187,7 +189,7 @@ void MainWindow::createWebView() {
     m_view->pageAction(QWebPage::ToggleUnderline)->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
 }
 
-void MainWindow::createSideBar() {
+void MainWindow::createSidebar() {
     //m_sidebar = new QWidget(this);
     //QVBoxLayout* sidebarLayout = new QVBoxLayout(m_sidebar);
     //m_sidebar->setLayout(sidebarLayout);
@@ -721,6 +723,28 @@ inline QVariant MainWindow::evalJS(const QString& js) {
 void MainWindow::annotateWebPage(QVariantList& groups) {
     QVariantList::iterator itI;
     int i = 0;
+    QString js = "window.addEventListener('mousedown',"
+        "function (e) {"
+          "if (window._vdom_selected) return;"
+          "if (!e.target) return;"
+          "if (e.target.className && "
+                "/\\bvdom-result\\b/.test(e.target.className)) {"
+            "window._vdom_selected = e.target;"
+          "}"
+        "}, true);"
+        "window.addEventListener('keydown',"
+          "function (e) {"
+            "if (e.keyCode == 27 && window._vdom_selected) {"
+              "var node = window._vdom_selected;"
+              "delete window._vdom_selected;"
+              "var event = document.createEvent('MouseEvents');"
+              "event.initMouseEvent('mouseout', true, true);"
+              "node.dispatchEvent(event);"
+              "return;"
+            "}"
+          "}, true);";
+    QVariant res = evalJS(js + "true");
+
     for (itI = groups.begin(); itI != groups.end(); i++, itI++) {
         QVariant groupVar = *itI;
         if (groupVar.canConvert<QVariantList>()) {
@@ -775,6 +799,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                         }
                         js += QString("box.addEventListener('mouseover',"
                             "function (e) {"
+                              "if (window._vdom_selected) return;"
                               "itemInfoEdit.plainText = %1;"
                               "statusBar.showMessage(%2);"
                               "nodes = document.getElementsByClassName('vdom-group-%3');"
@@ -793,6 +818,7 @@ void MainWindow::annotateWebPage(QVariantList& groups) {
                         //qDebug() << "JSON: " << js << endl;
                         js += QString("box.addEventListener('mouseout',"
                             "function (e) {"
+                              "if (window._vdom_selected) return;"
                               "nodes = document.getElementsByClassName('vdom-group-%1');"
                               "for (var i = 0; i < nodes.length; i++) {"
                                 "var node = nodes[i];"
