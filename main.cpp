@@ -16,6 +16,9 @@
 #include <QFile>
 #include <cstdio>
 
+static void help(int status_code);
+static void showVersion(const QApplication& app);
+
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
@@ -39,27 +42,50 @@ int main(int argc, char **argv)
     QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
     const QStringList args = app.arguments();
+    QStringList jsFiles;
 
-    // robotized
-    if (args.contains(QLatin1String("-r"))) {
-        QString listFile = args.at(2);
-        if (!(args.count() == 3) && QFile::exists(listFile)) {
-            qDebug() << "Usage: QtLauncher -r listfile";
-            exit(0);
-        }
-        MainWindow window(url);
-        QWebView *view = window.webView();
-        URLLoader loader(view, listFile);
-        QObject::connect(view, SIGNAL(loadFinished(bool)), &loader, SLOT(loadNext()));
-        window.show();
-        return app.exec();
-    } else {
-        if (args.count() > 1)
+    for (int i = 1; i < args.count(); i++) {
+        QString arg = args.at(i);
+        if (arg == "-h" || arg == "--help") {
+            //argHelp = true;
+            help(0);
+        } else if (arg.indexOf("--enable-js=") == 0) {
+            QString jsFile = arg.split("=").at(1);
+            jsFiles.push_back(jsFile);
+        } else if (arg == "-v" || arg == "--version") {
+            showVersion(app);
+            return 0;
+        } else if (arg.indexOf("-") == 0) {
+            fprintf(stderr, "Invalid command-line option: %s\n\n", arg.toUtf8().data());
+            exit(1);
+        } else {
             url = args.at(1);
-
-        MainWindow window(url);
-        window.show();
-        return app.exec();
+        }
     }
+
+    MainWindow window(url);
+    window.show();
+    return app.exec();
+}
+
+static void help(int status_code) {
+    fprintf(status_code == 0 ? stdout : stderr,
+        "Usage: VdomBrowser [Options] [URL]\n"
+        "Options:\n"
+        "  -h\n"
+        "  --help           Print this help page and exit\n"
+        "  --js <.js file>  JavaScript file executed after loading each web\n"
+        "                   page. Multiple --js are allowed and would run\n"
+        "                   in order.\n"
+        "  -v\n"
+        "  --version        Display version number.\n"
+    );
+    exit(status_code);
+}
+
+static void showVersion (const QApplication& app) {
+    std::cout << QString("VdomBrowser version %1\n"
+        "Copyright (c) 2009 by Yahoo! China EEEE Works, Alibaba Inc.\n"
+        ).arg(app.applicationVersion()).toUtf8().data();
 }
 
