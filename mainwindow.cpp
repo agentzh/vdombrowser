@@ -87,9 +87,30 @@ void MainWindow::loadFinished(bool done) {
     m_urlEdit->setText(m_view->url().toEncoded());
     addUrlToList();
 
-    if (!m_injectedJS.isNull() && m_injectedJS != "") {
-        QVariant res = evalJS(m_injectedJS + "true");
-        qDebug() << "injecting JS res: " << res << endl;
+    if (!m_injectedJSFiles.isEmpty()) {
+        for (int i = 0; i < m_injectedJSFiles.count(); i++) {
+            const QString& fileName = m_injectedJSFiles[i];
+            //qDebug() << QString("Checking if file %1 is readable...")
+                //.arg(fileName).toUtf8() << endl;
+            if (!QFile::exists(fileName)) {
+                qDebug() <<
+                    QString("js file \"%1\" not found.\n").arg(fileName).toUtf8().data();
+                continue;
+            }
+
+            QFile file(fileName);
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qDebug() <<
+                    QString("Failed to load js file %1: %2\n")
+                        .arg(fileName).arg(file.errorString()).toUtf8();
+                file.close();
+                continue;
+            }
+            qDebug() << "Loading JS file " << fileName << "...\n";
+            QString injectedJS = QString::fromUtf8(file.readAll()) + "\n";
+            QVariant res = evalJS(injectedJS + "true");
+            qDebug() << "injecting JS res: " << res << endl;
+        }
     }
 
     if (m_hunterEnabled) {
@@ -1000,28 +1021,7 @@ void MainWindow::loadUrl(const QUrl& url) {
 }
 
 void MainWindow::setJSFiles(QStringList& jsFiles) {
-    m_injectedJS.clear();
-    for (int i = 0; i < jsFiles.count(); i++) {
-        const QString& fileName = jsFiles[i];
-        //qDebug() << QString("Checking if file %1 is readable...")
-            //.arg(fileName).toUtf8() << endl;
-        if (!QFile::exists(fileName)) {
-            qDebug() <<
-                QString("js file \"%1\" not found.\n").arg(fileName).toUtf8().data();
-            continue;
-        }
-
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qDebug() <<
-                QString("Failed to load js file %1: %2\n")
-                    .arg(fileName).arg(file.errorString()).toUtf8();
-            file.close();
-            continue;
-        }
-        //qDebug() << "Reading file " << fileName << endl;
-        m_injectedJS += QString::fromUtf8(file.readAll()) + "\n";
-    }
+    m_injectedJSFiles = jsFiles;
         //qDebug() << "!!! JS: " << m_injectedJS << endl;
 }
 
