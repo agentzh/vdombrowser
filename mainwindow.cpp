@@ -42,6 +42,13 @@ MainWindow::MainWindow(const QString& url): currentZoom(100) {
     readSettings();
 
     setupUI();
+    m_callProc = new QProcess();
+
+    connect(m_view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
+            this, SLOT(populateJavaScriptWindowObject()));
+
+    connect(m_callProc, SIGNAL(finished(int, QProcess::ExitStatus)),
+            this, SLOT(processFinished(int, QProcess::ExitStatus)));
 
     QUrl qurl;
     qurl.setEncodedUrl(url.toUtf8(), QUrl::StrictMode);
@@ -379,6 +386,13 @@ void MainWindow::createSettingsMenu() {
         enableJS->setCheckable(true);
         enableJS->setChecked(m_enableJavascript);
     }
+
+    {
+        QAction *enableParseJS = prefMenu->addAction(tr("Enable &Parse Javascript"), this, SLOT(toggleEnableParseJavascript(bool)));
+        enableParseJS->setCheckable(true);
+        enableParseJS->setChecked(m_enableParseJavascript);
+    }
+
     {
         QAction *enableImages = prefMenu->addAction(tr("Enable &Images"), this, SLOT(toggleEnableImages(bool)));
         enableImages->setCheckable(true);
@@ -414,6 +428,7 @@ void MainWindow::writeSettings() {
     m_settings->setValue("pos", pos());
 
     m_settings->setValue("enableJavascript", QVariant(m_enableJavascript));
+    m_settings->setValue("enableParseJavascript", QVariant(m_enableParseJavascript));
     m_settings->setValue("enablePlugins", QVariant(m_enablePlugins));
     m_settings->setValue("enableImages", QVariant(m_enableImages));
     m_settings->setValue("enableJava", QVariant(m_enableJava));
@@ -438,6 +453,9 @@ void MainWindow::readSettings() {
     move(m_settings->value("pos", QPoint(200, 200)).toPoint());
 
     m_enableJavascript = m_settings->value("enableJavascript").toBool();
+    m_enableParseJavascript = m_settings->value("enableParseJavascript").toBool();
+    QWebVDom::setEnabledParseJavascript(m_enableParseJavascript);
+
     m_enablePlugins = m_settings->value("enablePlugins").toBool();
     m_enableImages = m_settings->value("enableImages").toBool();
     m_enableJava = m_settings->value("enableJava").toBool();

@@ -35,6 +35,51 @@ public:
 
     void setJSFiles(QStringList& jsFiles);
 
+public slots:
+    void populateJavaScriptWindowObject() {
+        m_view->page()->mainFrame()->addToJavaScriptWindowObject("vdom_external_call", this);
+    }
+
+    QString readFile(const QString& filePath) {
+        qDebug() << "read file: " << filePath;
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            return "";
+
+        QTextStream in(&file);
+        QString content = in.readAll();
+
+        qDebug() << "read file: " << content;
+        file.close();
+
+        return content;
+    }
+
+    bool writeFile(const QString& filePath, const QString& content) {
+        qDebug() << "write file: " << filePath;
+        QFile file(filePath);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            return false;
+        }
+
+        QTextStream out(&file);
+        out<<content;
+        file.close();
+
+        return true;
+    }
+
+    void processFinished(int exitCode, QProcess::ExitStatus) {
+        qDebug() << "processFinished: " << m_processCallback << exitCode;
+        m_view->page()->mainFrame()->evaluateJavaScript(m_processCallback + "(" + QString::number(exitCode) + ");");
+    }
+
+    bool callProcess(const QString& process, const QString& callback) {
+        m_processCallback = callback;
+        m_callProc->start(process);
+        return true;
+    }
+
 protected:
 
     virtual void closeEvent(QCloseEvent * event);
@@ -146,6 +191,11 @@ protected slots:
         m_view->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, enabled);
     }
 
+    void toggleEnableParseJavascript(bool enabled) {
+        m_enableParseJavascript = enabled;
+        QWebVDom::setEnabledParseJavascript(enabled);
+    }
+
     void toggleEnableJava(bool enabled) {
         m_enableJava = enabled;
         m_view->page()->settings()->setAttribute(QWebSettings::JavaEnabled, enabled);
@@ -221,6 +271,8 @@ private:
     QSettings* m_settings;
 
     bool m_enableJavascript;
+    bool m_enableParseJavascript;
+
     bool m_enablePlugins;
     bool m_enableImages;
     bool m_enableJava;
@@ -247,6 +299,9 @@ private:
 
     QSplitter* m_mainSplitter;
     QStringList m_injectedJSFiles;
+
+    QString m_processCallback;
+    QProcess* m_callProc;
 };
 
 #endif
