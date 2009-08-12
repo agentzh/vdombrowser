@@ -16,8 +16,6 @@
 #include "iterator.h"
 
 #include <qwebselected.h>
-#include "fielddialog.h"
-#include "viwiedialog.h"
 #include "webview.h"
 #include "webpage.h"
 
@@ -63,20 +61,6 @@ protected slots:
     }
 
     void loadUrl(const QUrl& url);
-
-    // viwie slots
-    void showTextFieldDialog();
-    void showImageFieldDialog();
-    void showViwieDialog();
-    void hideViwieDialog();
-
-    void addField();
-    void overrideField();
-    void deleteField();
-
-    void tmpSaveViwie();
-    void permanentSaveViwie();
-    void showDetailField(const QVariant& detail);
 
     void updateUrl(const QUrl& url) {
         m_urlEdit->setText(url.toEncoded());
@@ -231,13 +215,6 @@ private:
     QLabel *m_hunterLabel;
 
     IteratorConfigDialog* m_iteratorConfig;
-
-    bool m_viwieEnabled;
-    void createViwieUI();
-    QWebSelected* m_webSelected;
-    ViwieDialog *m_viwieDialog;
-    FieldDialog *m_fieldDialog;
-    QVariant viwieTags;
 
     QStringList m_urlList;
     QStringListModel m_urlCompleterModel;
