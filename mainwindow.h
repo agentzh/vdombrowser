@@ -74,9 +74,10 @@ public slots:
         m_view->page()->mainFrame()->evaluateJavaScript(m_processCallback + "(" + QString::number(exitCode) + ");");
     }
 
-    bool callProcess(const QString& process, const QString& callback) {
+    bool callProcess(const QString& process,  const QStringList& list, const QString& callback) {
         m_processCallback = callback;
-        m_callProc->start(process);
+        qDebug() << "run process: " << process << " args: " << list;
+        m_callProc->start(process, list);
         return true;
     }
 
