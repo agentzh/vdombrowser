@@ -7,7 +7,8 @@ if [ -z "$QTDIR" ]; then
 fi
 export PATH=$QTDIR/bin:$PATH
     #make distclean
-$QTDIR/bin/qmake "CONFIG-=debug" -r
+export QJSON_DIR=/export/vdom/yqjson
+$QTDIR/bin/qmake "CONFIG-=debug" "QJSON_DIR=/export/vdom/yqjson" "OUTPUT_DIR=/tmp/a/b" -r
 #qmake -r
 make -j2
 
