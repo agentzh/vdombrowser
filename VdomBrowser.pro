@@ -26,7 +26,7 @@ HEADERS += iterator.h \
 CONFIG -= app_bundle
 CONFIG += qt warn_on uitools
 DESTDIR = $$PWD
-LIBS += -lqjson
+LIBS += -lQJson
 
 BASE_DIR = $$PWD
 QT+=xml network webkit
@@ -43,6 +43,12 @@ CONFIG(release) {
 }
 DEFINES += BUILDING_QT__=1
 
+isEmpty(QJSON_DIR) {
+} else {
+    INCLUDEPATH = $$QJSON_DIR/include $$INCLUDEPATH
+    QMAKE_LIBDIR_FLAGS += -L$$QJSON_DIR/lib
+}
+
 CONFIG += $$(QT_WEBKIT)
 webkit_trunk {
     WEBKITDIR = $$(WEBKITDIR)
@@ -58,7 +64,7 @@ webkit_trunk {
     message(Using WebKit Build at $$WEBKITBUILD)
     QT -= webkit
     DEFINES += WEBKIT_TRUNK
-    QMAKE_LIBDIR_FLAGS = -L$$WEBKITBUILD
+    QMAKE_LIBDIR_FLAGS += -L$$WEBKITBUILD
     LIBS += -L$$WEBKITBUILD -lQtWebKit
     INCLUDEPATH = $$WEBKITDIR/WebKit/qt/Api $$INCLUDEPATH
     QMAKE_RPATHDIR = $$WEBKITBUILD $$QMAKE_RPATHDIR

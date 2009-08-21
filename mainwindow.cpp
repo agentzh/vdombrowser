@@ -454,7 +454,7 @@ void MainWindow::readSettings() {
 
     m_enableJavascript = m_settings->value("enableJavascript").toBool();
     m_enableParseJavascript = m_settings->value("enableParseJavascript").toBool();
-    QWebVDom::setEnabledParseJavascript(m_enableParseJavascript);
+    //QWebVDom::setEnabledParseJavascript(m_enableParseJavascript);
 
     m_enablePlugins = m_settings->value("enablePlugins").toBool();
     m_enableImages = m_settings->value("enableImages").toBool();

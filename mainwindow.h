@@ -15,7 +15,7 @@
 #include "iteratorconfigdialog.h"
 #include "iterator.h"
 
-#include <qwebselected.h>
+//#include <qwebselected.h>
 #include "webview.h"
 #include "webpage.h"
 
@@ -194,7 +194,7 @@ protected slots:
 
     void toggleEnableParseJavascript(bool enabled) {
         m_enableParseJavascript = enabled;
-        QWebVDom::setEnabledParseJavascript(enabled);
+        //QWebVDom::setEnabledParseJavascript(enabled);
     }
 
     void toggleEnableJava(bool enabled) {
