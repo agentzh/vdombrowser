@@ -22,4 +22,8 @@ Installation
     make
     make install
 
+Usage
+
+  $ /path/to/VdomBrowser/bin/VdomBrowser
+
 
