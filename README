@@ -1,0 +1,25 @@
+VdomBrowser is a QtWebKit based web browser with VDOM dumping support.
+It can also serve as a graphical debugger for webpage information
+extractor like those based on VDOM.pm.
+
+Installation
+
+  1. Install vdomwebkit's qt from here:
+
+    http://github.com/agentzh/vdomwebkit/
+
+  2. Install our qjson from here:
+
+    http://github.com/agentzh/qjson
+
+  3. Install this project
+
+    export WEBKITDIR=
+    export QTDIR=/path/to/vdomwebkit/qt
+    qmake 'CONFIG-=debug' \
+        OUTPUT_DIR=/where/to/install/VdomBrowser \
+        QJSON_DIR=/path/to/qjson -r
+    make
+    make install
+
+
