@@ -47,6 +47,7 @@ isEmpty(QJSON_DIR) {
 } else {
     INCLUDEPATH = $$QJSON_DIR/include $$INCLUDEPATH
     QMAKE_LIBDIR_FLAGS += -L$$QJSON_DIR/lib
+    QMAKE_RPATHDIR += $$QJSON_DIR/lib
 }
 
 INCLUDEPATH += $$QTDIR/include/QtWebKit
@@ -72,7 +73,6 @@ webkit_trunk {
     QMAKE_RPATHDIR = $$WEBKITBUILD $$QMAKE_RPATHDIR
 }
 
-QMAKE_RPATHDIR = $$QMAKE_RPATHDIR
 target.path = $$OUTPUT_DIR/bin
 INSTALLS += target
 
